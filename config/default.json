@@ -1,0 +1,22 @@
+{
+  "name": "api",
+  "port": 4005,
+  "mongo": {
+    "URI": "mongodb://localhost:27017/db",
+    "config": {
+      "useNewUrlParser": true,
+      "useCreateIndex": true,
+      "keepAlive": false,
+      "useFindAndModify": false,
+      "autoIndex": false,
+      "reconnectTries": 0,
+      "reconnectInterval": 3000,
+      "poolSize": 10,
+      "bufferMaxEntries": 0,
+      "connectTimeoutMS": 60000,
+      "socketTimeoutMS": 45000,
+      "family": 4
+    }
+  },
+  "morganFormat": "':remote-addr - :remote-user [:date[clf]] \":method :url HTTP/:http-version\" :status :res[content-length] \":referrer\" \":user-agent\""
+}
