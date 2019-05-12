@@ -2,9 +2,9 @@ import * as bcrypt from 'bcrypt'
 import {NextFunction, Request, Response} from 'express'
 import * as halson from 'halson'
 import * as jwt from 'jsonwebtoken'
-import {default as User} from '../schemas/user'
-import {OrderAPILogger} from '../utility/logger'
-import {formatOutput, formatUser} from '../utility/'
+import {default as User} from './user'
+import {OrderAPILogger} from '../utils/logger'
+import {formatOutput, formatUser} from '../utils'
 
 export let getUsers = async (req: Request, res: Response, next: NextFunction) => {
     let users = await User.find();

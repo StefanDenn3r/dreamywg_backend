@@ -1,6 +1,6 @@
 import {Response} from 'express'
 import * as js2xmlparser from 'js2xmlparser'
-import {ApplicationType} from '../models/applicationType'
+import {ApplicationType} from './applicationType'
 import * as halson from 'halson'
 
 export let formatOutput = (res: Response, data: any, statusCode: number, rootElement?: string) => {

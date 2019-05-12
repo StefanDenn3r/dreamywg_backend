@@ -2,23 +2,21 @@ import * as bodyParser from 'body-parser'
 import * as compression from 'compression'
 import * as helmet from 'helmet';
 import * as cors from 'cors';
-import * as errorHandler from './utility/errorHandler'
+import * as errorHandler from './utils/errorHandler'
 import * as express from 'express'
 import * as config from 'config';
 import * as morgan from 'morgan'
 import * as mongoose from 'mongoose'
 import * as http from 'http'
-import {OrderAPILogger, WinstonStream} from './utility/logger'
+import {OrderAPILogger, WinstonStream} from './utils/logger'
 
 
-import {APIRoute} from './routes/api'
-import {UserRoute} from './routes/user'
+import {UserRoute} from './users/userAPI'
 
 class Server {
     public app: express.Application;
     public userRoutes: UserRoute = new UserRoute();
     public env: string = process.env.NODE_ENV || 'development';
-    public apiRoutes: APIRoute = new APIRoute();
     public port: number | string;
     protected server: http.Server;
     private mongoUrl: string = config.get('mongo.URI');
@@ -59,7 +57,6 @@ class Server {
 
     private applyRoutes(): void {
         UserRoute.routes(this.app);
-        APIRoute.routes(this.app);
         OrderAPILogger.logger.info('Applied Routes: [USER][AUTHENTICATION][BUSINESS LOGIC]')
     }
 
