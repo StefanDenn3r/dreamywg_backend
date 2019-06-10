@@ -1,15 +1,23 @@
 import {Document, Model, model, Schema} from "mongoose";
-import {IUser} from './userModel'
+
+interface IUser {
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+    password?: string;
+    isVerified: boolean
+}
 
 export interface IUserModel extends IUser, Document {
     fullName(): string;
 }
 
 export var UserSchema: Schema = new Schema({
-    email: String,
+    email: {type: String, unique: true},
     firstName: String,
     lastName: String,
-    password: String
+    password: String,
+    isVerified: {type: Boolean, default: false}
 }, {versionKey: false});
 
 UserSchema.methods.fullName = function (): string {
