@@ -14,6 +14,7 @@
     "stryker:init": "stryker init",
     "dev": "cross-env PORT=4005 NODE_ENV=dev ts-node ./src/app.ts",
     "dev2": "NODE_ENV=development tsc-watch --onSuccess \"node ./dist/app.js\"",
+    "debug": "cross-env PORT=4005 NODE_ENV=dev ts-node --debug-brk ./src/app.ts",
     "prod": "PORT=3000 npm run build && npm run start",
     "tsc": "tsc"
   },
