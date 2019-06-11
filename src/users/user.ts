@@ -38,5 +38,14 @@ UserSchema.methods.fullName = function (): string {
     return (this.firstName.trim() + " " + this.lastName.trim());
 };
 
+// transformer : should be separated in different file if big enough
+UserSchema.set('toJSON', {
+    transform: function(doc, ret, options) {
+        ret.dateOfBirth = new Date(ret.dateOfBirth).toLocaleDateString();
+        delete ret.password;
+        return ret;
+    }
+})
+
 const User: Model<IUserModel> = model<IUserModel>("User", UserSchema);
 export default User
