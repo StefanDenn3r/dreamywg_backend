@@ -18,14 +18,5 @@
       "family": 4
     }
   },
-  "nodemailer": {
-    "host": "smtp.gmail.com",
-    "port": 587,
-    "secure": false,
-    "auth": {
-      "user": "noreply.dreamywg@gmail.com",
-      "pass": "Dr34myWg!"
-    }
-  },
   "morganFormat": "':remote-addr - :remote-user [:date[clf]] \":method :url HTTP/:http-version\" :status :res[content-length] \":referrer\" \":user-agent\""
 }

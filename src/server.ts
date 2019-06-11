@@ -7,7 +7,8 @@ import * as express from 'express'
 import * as config from 'config';
 import * as morgan from 'morgan'
 import * as mongoose from 'mongoose'
-import {APILogger, WinstonStream} from './utils/logger'
+import * as http from 'http'
+import {OrderAPILogger, WinstonStream} from './utils/logger'
 
 
 import {UserRoute} from './users/userAPI'
@@ -17,6 +18,7 @@ class Server {
     public userRoutes: UserRoute = new UserRoute();
     public env: string = process.env.NODE_ENV || 'development';
     public port: number | string;
+    protected server: http.Server;
     private mongoUrl: string = config.get('mongo.URI');
 
     constructor(port: number | string = 5003) {
@@ -34,8 +36,8 @@ class Server {
     private async start() {
         await this.mongoSetup();
         this.app.listen(this.app.get('port'), () => {
-            APILogger.logger.info(`Server [${config.get('name')}] is running at http://localhost:${this.app.get('port')} in ${this.app.get('env')} Mode`);
-            APILogger.logger.info('Press CTRL-C to stop')
+            OrderAPILogger.logger.info(`Server [${config.get('name')}] is running at http://localhost:${this.app.get('port')} in ${this.app.get('env')} Mode`);
+            OrderAPILogger.logger.info('Press CTRL-C to stop')
         })
     }
 
@@ -50,20 +52,20 @@ class Server {
         this.app.use(errorHandler.logging);
         this.app.use(errorHandler.clientErrorHandler);
         this.app.use(errorHandler.errorHandler);
-        APILogger.logger.info('Applied middleware: [HELMET][CORS][COMPRESSION][LOGGING][ERROR HANDLER]')
+        OrderAPILogger.logger.info('Applied middleware: [HELMET][CORS][COMPRESSION][LOGGING][ERROR HANDLER]')
     }
 
     private applyRoutes(): void {
         UserRoute.routes(this.app);
-        APILogger.logger.info('Applied Routes: [USER][AUTHENTICATION][BUSINESS LOGIC]')
+        OrderAPILogger.logger.info('Applied Routes: [USER][AUTHENTICATION][BUSINESS LOGIC]')
     }
 
     private async mongoSetup() {
         try {
             await mongoose.connect(this.mongoUrl, config.get('mongo.config'));
-            APILogger.logger.info(`Connection to MongoDB at ${this.mongoUrl} established`)
+            OrderAPILogger.logger.info(`Connection to MongoDB at ${this.mongoUrl} established`)
         } catch (err) {
-            APILogger.logger.error(`Connection to MONGO DB failed : ${err} - Shutting down Server`)
+            OrderAPILogger.logger.error(`Connection to MONGO DB failed : ${err} - Shutting down Server`)
         }
     }
 }

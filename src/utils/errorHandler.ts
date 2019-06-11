@@ -1,8 +1,8 @@
 import {NextFunction, Request, Response} from 'express'
-import {APILogger} from './logger'
+import {OrderAPILogger} from './logger'
 
 export let logging = (err: Error, req: Request, res: Response, next: NextFunction) => {
-    APILogger.logger.error(err);
+    OrderAPILogger.logger.error(err);
     next(err)
 };
 

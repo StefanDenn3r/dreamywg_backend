@@ -3,7 +3,7 @@ import * as mongoose from 'mongoose'
 
 const {combine, timestamp, label, prettyPrint, printf, json} = format;
 
-export class APILogger {
+export class OrderAPILogger {
     public static myFormat = printf(info => {
         return `[${info.timestamp}] [${info.level}] => ${info.message}`
     });
@@ -14,7 +14,7 @@ export class APILogger {
                 level: 'info',
                 filename: 'aggregated.log',
                 format: combine(
-                    label({label: 'api errors'}),
+                    label({label: 'order-api errors'}),
                     timestamp(),
                     json()
                 ),
@@ -23,7 +23,7 @@ export class APILogger {
                 level: 'info',
                 handleExceptions: true,
                 format: combine(
-                    label({label: 'api errors'}),
+                    label({label: 'order-api errors'}),
                     timestamp(),
                     printf(info => {
                         return `[${info.timestamp}] [${info.level}] => ${info.message}`
@@ -38,8 +38,8 @@ export class APILogger {
 export class WinstonStream {
     write(text: string) {
         mongoose.set('debug', true);
-        APILogger.logger.info(text);
-        APILogger.logger.debug(text)
+        OrderAPILogger.logger.info(text);
+        OrderAPILogger.logger.debug(text)
     }
 }
 
