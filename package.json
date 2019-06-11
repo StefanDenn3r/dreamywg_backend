@@ -14,6 +14,7 @@
     "stryker:init": "stryker init",
     "dev": "cross-env PORT=4005 NODE_ENV=dev ts-node ./src/app.ts",
     "dev2": "NODE_ENV=development tsc-watch --onSuccess \"node ./dist/app.js\"",
+    "debug": "cross-env PORT=4005 NODE_ENV=dev ts-node --debug-brk ./src/app.ts",
     "prod": "PORT=3000 npm run build && npm run start",
     "tsc": "tsc"
   },
@@ -59,6 +60,7 @@
     "compression": "^1.7.4",
     "config": "^3.1.0",
     "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "express": "^4.16.4",
     "express-winston": "^3.1.0",
     "halson": "^3.0.0",
@@ -68,6 +70,7 @@
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.5.3",
     "morgan": "^1.9.1",
+    "nodemailer": "^6.2.1",
     "save": "^2.3.3",
     "tsc-watch": "^2.1.2",
     "winston": "^3.2.1"
