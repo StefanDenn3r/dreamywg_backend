@@ -24,7 +24,7 @@ export let sendVerificationMail = async (req: Request, res: Response, userId) =>
         from: nodemailerOptions.auth.user,
         to: user.email,
         subject: 'Account Verification Token',
-        text: 'Hello,\n\n' + 'Please verify your account by clicking the link: \nhttp:\/\/' + req.headers.host + '\/confirmation\/' + token.token + '.\n'
+        text: 'Hello,\n\n' + 'Please verify your account by clicking the link: \nhttp:\/\/' + req.headers.host + '\/confirmation?token=' + token.token + '.\n'
     };
     try {
         transporter.sendMail(mailOptions)
