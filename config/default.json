@@ -1,6 +1,7 @@
 {
   "name": "api",
   "port": 4005,
+  "host": "localhost",
   "mongo": {
     "URI": "mongodb://localhost:27017/db",
     "config": {
