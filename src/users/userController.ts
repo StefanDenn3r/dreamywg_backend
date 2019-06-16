@@ -124,5 +124,5 @@ export let confirmEmail = async (req: Request, res: Response, next: NextFunction
     } catch (err) {
         return res.status(500).send(err.message);
     }
-    return res.status(200).send("The account has been verified.");
+    return res.status(200).send("Your account has successfully been verified.");
 };

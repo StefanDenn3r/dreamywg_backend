@@ -1,21 +1,15 @@
 import {default as User, IUserModel} from './user'
 import Token, {ITokenModel} from "../tokens/token";
-import {Request, Response} from "express";
 import * as crypto from 'crypto'
 import * as nodemailer from 'nodemailer'
 import * as config from 'config'
 
 
-export let sendVerificationMail = async (req: Request, res: Response, userId) => {
-    //const userId = await req.params.id;
+export let sendVerificationMail = async (userId) => {
     let user: IUserModel = await User.findById(userId);
     let token: ITokenModel = new Token({_userId: user._id, token: crypto.randomBytes(16).toString('hex')});
 
-    try {
-        await token.save();
-    } catch (err) {
-        return res.status(500).send({msg: err.message});
-    }
+    await token.save();
 
     // Send email
     const nodemailerOptions = config.get('nodemailer');
@@ -24,15 +18,9 @@ export let sendVerificationMail = async (req: Request, res: Response, userId) =>
         from: nodemailerOptions.auth.user,
         to: user.email,
         subject: 'Account Verification Token',
-        text: 'Hello,\n\n' + 'Please verify your account by clicking the link: \nhttp:\/\/' + req.headers.host + '\/confirmation\/' + token.token + '.\n'
+        text: `Hello,\n\n' Please verify your account by clicking the link: \nhttp:// ${config.get('host')}:${config.get('port')}/confirmation?token=${token.token}.\n`
     };
-    try {
-        transporter.sendMail(mailOptions)
-    } catch (err) {
-        return res.status(500).send({msg: err.message});
-    }
-
-    return res.status(200).send();
+    transporter.sendMail(mailOptions)
 };
 
 
