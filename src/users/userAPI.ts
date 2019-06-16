@@ -10,7 +10,7 @@ export class UserRoute {
         app.route('/users').get(userController.getUsers);
         app.route('/users/login').post(userController.login);
 
-       //app.route('/confirmation/:token').get(userController.confirmEmail);
-        app.route('/verify/:id').post(userService.sendVerificationMail);
+        app.route('/confirmation/:token').get(userController.confirmEmail);
+        //app.route('/verify/:id').post(userService.sendVerificationMail);
     }
 }
