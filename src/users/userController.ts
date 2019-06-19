@@ -6,6 +6,7 @@ import {default as User, IUserModel} from './user'
 import {APILogger} from '../utils/logger'
 import {formatOutput, formatUser} from '../utils'
 import Token, {ITokenModel} from "../tokens/token";
+import {sendVerificationMail} from './userService'
 
 export let getUsers = async (req: Request, res: Response, next: NextFunction) => {
     let users = await User.find();
@@ -47,6 +48,7 @@ export let addUser = (req: Request, res: Response, next: NextFunction) => {
             return res.status(500).send(error)
         }
         user = halson(user.toJSON()).addLink('self', `/users/${user._id}`);
+        sendVerificationMail(user.id);
         return formatOutput(res, user, 201, 'user')
     })
 };
