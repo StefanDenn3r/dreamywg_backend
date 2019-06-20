@@ -8,6 +8,7 @@ import {formatOutput, formatUser} from '../utils'
 import Token, {ITokenModel} from "../tokens/token";
 import {sendVerificationMail} from './userService'
 
+//TODO add try catch to every await
 export let getUsers = async (req: Request, res: Response, next: NextFunction) => {
     let users = await User.find();
 
@@ -36,6 +37,7 @@ export let getUser = async (req: Request, res: Response, next: NextFunction) => 
 
 export let addUser = (req: Request, res: Response, next: NextFunction) => {
     const newUser = new User(req.body);
+
     try {
         newUser.password = bcrypt.hashSync(newUser.password, 10)
     } catch (err) {
@@ -88,12 +90,16 @@ export let removeUser = async (req: Request, res: Response, next: NextFunction) 
 };
 
 export let login = async (req: Request, res: Response, next: NextFunction) => {
-    const email = req.query.email;
-    const password = req.query.password;
-
-    let user = await User.findOne({email: email});
-    if (!user) {
-        APILogger.logger.info(`[GET] [/users/login] no user found with the email ${email}`);
+    const email = req.body.email;
+    const password = req.body.password;
+    let user ;
+    try {
+        user = await User.findOne({email: email});
+        if (!user) {
+            APILogger.logger.info(`[GET] [/users/login] no user found with the email ${email}`);
+            return res.status(404).send()
+        }
+    } catch (e) {
         return res.status(404).send()
     }
 
