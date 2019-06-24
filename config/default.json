@@ -1,6 +1,7 @@
 {
   "name": "api",
   "port": 4005,
+  "socketio": 8080,
   "host": "localhost",
   "mongo": {
     "URI": "mongodb://localhost:27017/db",
