@@ -1,7 +1,7 @@
 import { createServer, Server } from 'http';
 import * as express from 'express';
 import * as socketIo from 'socket.io';
-
+import * as mongoose from 'mongoose';
 import { Message } from './chat';
 
 export class ChatServer {
