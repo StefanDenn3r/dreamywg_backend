@@ -9,8 +9,9 @@ export class UserRoute {
         app.route('/users/:id').get(userController.getUser);
         app.route('/users').get(userController.getUsers);
         app.route('/users/login').post(userController.login);
-
         app.route('/confirmation/:token').get(userController.confirmEmail);
+        app.route('/socialmediaauth/linkedin').get(userController.registerLinkedin);
+        app.route('/socialmediaauth/facebook').get(userController.registerFacebook);
         //app.route('/verify/:id').post(userService.sendVerificationMail);
     }
 }
