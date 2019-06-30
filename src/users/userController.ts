@@ -6,9 +6,13 @@ import {default as User, IUserModel} from './user'
 import {APILogger} from '../utils/logger'
 import {formatOutput, formatUser} from '../utils'
 import Token, {ITokenModel} from "../tokens/token";
+import TokenLinkedin, {ITokenModelLinkedin} from "../tokens/tokenLinkedin";
+import TokenFacebook, {ITokenModelFacebook} from "../tokens/tokenFacebook";
 import * as querystring from 'query-string';
-import { request } from 'http';
-import {OAuth} from 'oauth'
+import axios from 'axios';
+import {OAuth} from 'oauth';
+import * as mongoose from "mongoose";
+
 export let getUsers = async (req: Request, res: Response, next: NextFunction) => {
     let users = await User.find();
 
@@ -114,10 +118,14 @@ export let login = async (req: Request, res: Response, next: NextFunction) => {
 export let confirmEmail = async (req: Request, res: Response, next: NextFunction) => {
     const tokenParam = req.params.token;
     let token: ITokenModel = await Token.findOne({token: tokenParam});
-    if (!token) return res.status(400).send("token not found");
+    if (!token) {
+        return res.status(400).send("token not found");
+    }
 
     let user: IUserModel = await User.findById(token._userId);
-    if (!user) return res.status(400).send("invalid token");
+    if (!user) {
+        return res.status(400).send("invalid token");
+    }
 
     // maybe add check if user already verified
     user.isVerified = true;
@@ -128,7 +136,7 @@ export let confirmEmail = async (req: Request, res: Response, next: NextFunction
     }
     return res.status(200).send("Your account has successfully been verified.");
 };
-export let registerFacebook = async(req: Request, res: Response, next: NextFunction) => {
+export let registerFacebook = async (req: Request, res: Response, next: NextFunction) => {
     const code = req.query.code;
     const state = req.query.state;
 
@@ -136,14 +144,15 @@ export let registerFacebook = async(req: Request, res: Response, next: NextFunct
         handshakeFb(code, state, res);
     } catch (err) {
         APILogger.logger.error(`[POST] [/users] something went wrong # ${err.message}`);
-        next(err)
+        next(err);
+        return;
     }
-    return res.status(200).send("Linkedin auth ok");    
+    //return res.status(200).send("Facebook auth ok");
+    res.redirect("http://localhost:3000");
 
 }
 
-
-export let registerLinkedin = async(req: Request, res: Response, next: NextFunction) => {
+export let registerLinkedin = async (req: Request, res: Response, next: NextFunction) => {
     console.log("register linkedin is being called")
     const code = req.query.code;
     const state = req.query.state;
@@ -152,56 +161,68 @@ export let registerLinkedin = async(req: Request, res: Response, next: NextFunct
         handshake(code, state, res);
     } catch (err) {
         APILogger.logger.error(`[POST] [/users] something went wrong # ${err.message}`);
-        next(err)
+        next(err);
+        return;
     }
-    return res.status(200).send("Linkedin auth ok");
+    //return res.status(200).send("Linkedin auth ok");
+    res.redirect("http://localhost:3000");
 }
-export let handshakeFb = (code: string, state: string, res: Response) => {
+export let handshakeFb = async (code: string, state: string, res: Response) => {
+    const redirect_uri = "https://98229c38.ngrok.io/socialmediaauth/facebook";
+    const client_id = "595941830904271";
+    const client_secret = "c68a35d1246498371ce21c3277753016";
 
+    let result;
+    try {
+        const data = querystring.stringify({
+            grant_type: "authorization_code",
+            code: code,
+            redirect_uri: redirect_uri,//should match as in Linkedin application setup
+            client_id: client_id,
+            client_secret: client_secret// the secret
+        });
+        result = await axios.post('https://graph.facebook.com/v3.3/oauth/access_token', data)
+    } catch (e) {
+        console.log("problem with request: " + e.message);
+        return res.status(500).send(e.message);
+    }
+
+    let data = result.data
+
+    let access_token: ITokenModelFacebook = new TokenFacebook(data);
+
+    await access_token.save();
+
+    return;
 };
-export let handshake = (code: string, state: string, res: Response) => {
+
+export let handshake = async (code: string, state: string, res: Response) => {
+
     console.log("handshake function");
-    const redirect_uri = "http://localhost:4005/socialmediaauth/linkedin";
+    const redirect_uri = "http://03440e01.ngrok.io/socialmediaauth/linkedin";
     const client_id = "78guq2rtxaouam";
     const client_secret = "tWZPBjm8WgX9ngaH";
 
-    const data = querystring.stringify({
-        grant_type: "authorization_code",
-        code: code,
-        redirect_uri: redirect_uri,//should match as in Linkedin application setup
-        client_id: client_id,
-        client_secret: client_secret// the secret
-    });
+    let result;
+    try {
+        const data = querystring.stringify({
+            grant_type: "authorization_code",
+            code: code,
+            redirect_uri: redirect_uri,//should match as in Linkedin application setup
+            client_id: client_id,
+            client_secret: client_secret// the secret
+        });
+         result = await axios.post('https://www.linkedin.com/oauth/v2/accessToken', data)
+    } catch (e) {
+        console.log("problem with request: " + e.message);
+        return res.status(500).send(e.message);
+    }
+    let data = result.data
 
-      const req = request(
-      {
-        host: 'www.linkedin.com',
-        path: '/oauth/v2/accessToken',
-        protocol: 'https:',
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Content-Length': Buffer.byteLength(data)
-        }
-      },
-      response => {
-        var data = '';
-        response.setEncoding('utf8');
-        response.on('data', (chunk) => {
-            data += chunk;
-        });
-        response.on('error', (e) => {
-            console.log("problem with request: " + e.message);
-            res.status(500).send(e.message);
-        });
-        response.on('end', () => {
-          //const result = Buffer.concat(chunks).toString();
-          console.log(JSON.parse(data));
-          //return result;
-        });
-      }
-    );
-    req.write(data);
-    req.end();
-    res.status(200).send("Linkedin auth ok");
+    let access_token: ITokenModelLinkedin = new TokenLinkedin(data);
+
+    await access_token.save();
+
+    return;
+
 };
