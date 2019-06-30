@@ -10,7 +10,6 @@ import TokenLinkedin, {ITokenModelLinkedin} from "../tokens/tokenLinkedin";
 import TokenFacebook, {ITokenModelFacebook} from "../tokens/tokenFacebook";
 import * as querystring from 'query-string';
 import axios from 'axios';
-import {OAuth} from 'oauth';
 import * as mongoose from "mongoose";
 
 export let getUsers = async (req: Request, res: Response, next: NextFunction) => {
