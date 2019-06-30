@@ -12,6 +12,7 @@ export class UserRoute {
         app.route('/confirmation/:token').get(userController.confirmEmail);
         app.route('/socialmediaauth/linkedin').get(userController.registerLinkedin);
         app.route('/socialmediaauth/facebook').get(userController.registerFacebook);
+
         //app.route('/verify/:id').post(userService.sendVerificationMail);
     }
 }
