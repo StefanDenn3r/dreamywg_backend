@@ -7,8 +7,6 @@ import {APILogger} from '../utils/logger'
 import {formatOutput, formatUser} from '../utils'
 import {sendVerificationMail} from './userService'
 import Token, {ITokenModel} from './tokens/token'
-import TokenLinkedin, {ITokenModelLinkedin} from "./tokens/tokenLinkedin";
-import TokenFacebook, {ITokenModelFacebook} from "./tokens/tokenFacebook";
 import * as querystring from 'query-string';
 import axios from 'axios';
 import * as mongoose from "mongoose";
@@ -147,33 +145,31 @@ export let confirmEmail = async (req: Request, res: Response, next: NextFunction
 export let registerFacebook = async (req: Request, res: Response, next: NextFunction) => {
     const code = req.query.code;
     const state = req.query.state;
-
+    let user;
     try {
-        handshakeFb(code, state, res);
+        user = await handshakeFb(code, state, res).catch(console.error);
     } catch (err) {
         APILogger.logger.error(`[POST] [/users] something went wrong # ${err.message}`);
         next(err);
         return;
     }
-    //return res.status(200).send("Facebook auth ok");
-    res.redirect("http://localhost:3000");
-
+    
+    res.redirect(`http://localhost:3000/register?uid=${user._id}`);
 }
 
 export let registerLinkedin = async (req: Request, res: Response, next: NextFunction) => {
-    console.log("register linkedin is being called")
     const code = req.query.code;
     const state = req.query.state;
-
+    let user;
     try {
-        handshake(code, state, res);
+        user = await handshake(code, state, res).catch(console.error);
     } catch (err) {
         APILogger.logger.error(`[POST] [/users] something went wrong # ${err.message}`);
         next(err);
         return;
     }
-    //return res.status(200).send("Linkedin auth ok");
-    res.redirect("http://localhost:3000");
+
+    res.redirect(`http://localhost:3000/register?uid=${user._id}`);
 }
 export let handshakeFb = async (code: string, state: string, res: Response) => {
     // TODO PUT CREDENTIALS INTO ENVIRONMENT VARIABLES!
@@ -186,31 +182,26 @@ export let handshakeFb = async (code: string, state: string, res: Response) => {
         const data = querystring.stringify({
             grant_type: "authorization_code",
             code: code,
-            redirect_uri: redirect_uri,//should match as in Linkedin application setup
+            redirect_uri: redirect_uri,
             client_id: client_id,
             client_secret: client_secret// the secret
         });
         result = await axios.post('https://graph.facebook.com/v3.3/oauth/access_token', data)
     } catch (e) {
-        console.log("problem with request: " + e.message);
         return res.status(500).send(e.message);
     }
 
     let data = result.data
 
-    let access_token: ITokenModelFacebook = new TokenFacebook(data);
-    await access_token.save();
-    
     let user = new User();
     user.setFacebookToken(data);
     await user.save().catch(console.error);
 
-    return;
+    return user;
 };
 
 export let handshake = async (code: string, state: string, res: Response) => {
     // TODO PUT CREDENTIALS INTO ENVIRONMENT VARIABLES!
-    console.log("handshake function");
     const redirect_uri = "http://localhost:4005/users/socialmediaauth/linkedin";
     const client_id = "78guq2rtxaouam";
     const client_secret = "tWZPBjm8WgX9ngaH";
@@ -226,19 +217,12 @@ export let handshake = async (code: string, state: string, res: Response) => {
         });
          result = await axios.post('https://www.linkedin.com/oauth/v2/accessToken', data)
     } catch (e) {
-        console.log("problem with request: " + e.message);
         return res.status(500).send(e.message);
     }
     let data = result.data
 
-    let access_token: ITokenModelLinkedin = new TokenLinkedin(data);
-    await access_token.save();
-
     let user = new User();
     user.setLinkedinToken(data);
     await user.save().catch(console.error);
-
-
-    return;
-
+    return user;
 };

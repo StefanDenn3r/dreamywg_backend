@@ -1,6 +1,6 @@
 import {Document, Model, model, Schema} from "mongoose";
-import {ITokenFacebook, ITokenModelFacebook} from './tokens/tokenFacebook'
-import {ITokenLinkedin, ITokenModelLinkedin} from './tokens/tokenLinkedin'
+import {ITokenFacebook} from './tokens/tokenFacebook'
+import {ITokenLinkedin} from './tokens/tokenLinkedin'
 enum Gender {
     MALE="MALE",
     FEMALE="FEMALE",
@@ -23,8 +23,8 @@ interface IUser {
 
 export interface IUserModel extends IUser, Document {
     fullName(): string;
-    setFacebookToken(data);
-    setLinkedinToken(data);
+    setFacebookToken(data: ITokenFacebook);
+    setLinkedinToken(data: ITokenLinkedin);
 }
 
 export var UserSchema: Schema = new Schema({
@@ -36,8 +36,9 @@ export var UserSchema: Schema = new Schema({
     gender: {type: String, enum: this.Gender, default: Gender.FLUID},
     dateOfBirth: Date,
     hasOffers: Boolean,
-    facebookToken: Object,
-    linkedinToken: Object,
+    // TODO define schema object per giben interface
+    facebookToken: Schema.Types.Mixed,
+    linkedinToken: Schema.Types.Mixed,
     isVerified: {type: Boolean, default: false}
 }, {versionKey: false});
 
@@ -45,11 +46,11 @@ UserSchema.methods.fullName = function (): string {
     return (this.firstName.trim() + " " + this.lastName.trim());
 };
 
-UserSchema.methods.setFacebookToken = (data) => {
+UserSchema.methods.setFacebookToken = function (data: ITokenFacebook) {
     this.facebookToken = data;
 }
 
-UserSchema.methods.setLinkedinToken = (data) => {
+UserSchema.methods.setLinkedinToken = function (data: ITokenLinkedin) {
     this.linkedinToken = data;
 }
 
