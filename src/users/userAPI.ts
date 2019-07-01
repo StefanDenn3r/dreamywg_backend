@@ -10,8 +10,8 @@ export class UserRoute {
         app.route('/users').get(userController.getUsers);
         app.route('/users/login').post(userController.login);
         app.route('/confirmation/:token').get(userController.confirmEmail);
-        app.route('/socialmediaauth/linkedin').get(userController.registerLinkedin);
-        app.route('/socialmediaauth/facebook').get(userController.registerFacebook);
+        app.route('/users/socialmediaauth/linkedin').get(userController.registerLinkedin);
+        app.route('/users/socialmediaauth/facebook').get(userController.registerFacebook);
 
         //app.route('/verify/:id').post(userService.sendVerificationMail);
     }
