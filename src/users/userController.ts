@@ -38,7 +38,7 @@ export let getUser = async (req: Request, res: Response, next: NextFunction) => 
     return formatOutput(res, formatUser(user), 200, 'user')
 };
 
-
+// TODO refactor register
 export let addUser = (req: Request, res: Response, next: NextFunction) => {
     const newUser = new User(req.body);
 
@@ -48,6 +48,7 @@ export let addUser = (req: Request, res: Response, next: NextFunction) => {
         APILogger.logger.error(`[POST] [/users] something went wrong when saving a new user ${newUser.fullName()}  # ${err.message}`);
         next(err)
     }
+
     return newUser.save((error, user) => {
         if (error) {
             APILogger.logger.error(`[POST] [/users] something went wrong when saving a new user ${newUser.fullName()} | ${error.message}`);
