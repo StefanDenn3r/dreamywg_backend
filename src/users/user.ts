@@ -1,5 +1,6 @@
 import {Document, Model, model, Schema} from "mongoose";
-
+import {ITokenFacebook, ITokenModelFacebook} from './tokens/tokenFacebook'
+import {ITokenLinkedin, ITokenModelLinkedin} from './tokens/tokenLinkedin'
 enum Gender {
     MALE="MALE",
     FEMALE="FEMALE",
@@ -14,12 +15,16 @@ interface IUser {
     phoneNumber?: string;
     gender?: Gender;
     dateOfBirth?: Date;
+    facebookToken: ITokenFacebook;
+    linkedinToken: ITokenLinkedin;
     hasOffers?: boolean; // to determine if the said user is an offerer
     isVerified: boolean
 }
 
 export interface IUserModel extends IUser, Document {
     fullName(): string;
+    setFacebookToken(data);
+    setLinkedinToken(data);
 }
 
 export var UserSchema: Schema = new Schema({
@@ -31,12 +36,22 @@ export var UserSchema: Schema = new Schema({
     gender: {type: String, enum: this.Gender, default: Gender.FLUID},
     dateOfBirth: Date,
     hasOffers: Boolean,
+    facebookToken: Object,
+    linkedinToken: Object,
     isVerified: {type: Boolean, default: false}
 }, {versionKey: false});
 
 UserSchema.methods.fullName = function (): string {
     return (this.firstName.trim() + " " + this.lastName.trim());
 };
+
+UserSchema.methods.setFacebookToken = (data) => {
+    this.facebookToken = data;
+}
+
+UserSchema.methods.setLinkedinToken = (data) => {
+    this.linkedinToken = data;
+}
 
 // transformer : should be separated in different file if big enough
 UserSchema.set('toJSON', {

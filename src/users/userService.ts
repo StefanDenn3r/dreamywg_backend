@@ -1,5 +1,5 @@
 import {default as User, IUserModel} from './user'
-import Token, {ITokenModel} from "../tokens/token";
+import Token, {ITokenModel} from "./tokens/token";
 import * as crypto from 'crypto'
 import * as nodemailer from 'nodemailer'
 import * as config from 'config'

@@ -5,8 +5,10 @@ import * as jwt from 'jsonwebtoken'
 import {default as User, IUserModel} from './user'
 import {APILogger} from '../utils/logger'
 import {formatOutput, formatUser} from '../utils'
-import TokenLinkedin, {ITokenModelLinkedin} from "../tokens/tokenLinkedin";
-import TokenFacebook, {ITokenModelFacebook} from "../tokens/tokenFacebook";
+import {sendVerificationMail} from './userService'
+import Token, {ITokenModel} from './tokens/token'
+import TokenLinkedin, {ITokenModelLinkedin} from "./tokens/tokenLinkedin";
+import TokenFacebook, {ITokenModelFacebook} from "./tokens/tokenFacebook";
 import * as querystring from 'query-string';
 import axios from 'axios';
 import * as mongoose from "mongoose";
@@ -174,7 +176,8 @@ export let registerLinkedin = async (req: Request, res: Response, next: NextFunc
     res.redirect("http://localhost:3000");
 }
 export let handshakeFb = async (code: string, state: string, res: Response) => {
-    const redirect_uri = "https://98229c38.ngrok.io/socialmediaauth/facebook";
+    // TODO PUT CREDENTIALS INTO ENVIRONMENT VARIABLES!
+    const redirect_uri = "http://localhost:4005/users/socialmediaauth/facebook";
     const client_id = "595941830904271";
     const client_secret = "c68a35d1246498371ce21c3277753016";
 
@@ -196,16 +199,19 @@ export let handshakeFb = async (code: string, state: string, res: Response) => {
     let data = result.data
 
     let access_token: ITokenModelFacebook = new TokenFacebook(data);
-
     await access_token.save();
+    
+    let user = new User();
+    user.setFacebookToken(data);
+    await user.save().catch(console.error);
 
     return;
 };
 
 export let handshake = async (code: string, state: string, res: Response) => {
-
+    // TODO PUT CREDENTIALS INTO ENVIRONMENT VARIABLES!
     console.log("handshake function");
-    const redirect_uri = "http://03440e01.ngrok.io/socialmediaauth/linkedin";
+    const redirect_uri = "http://localhost:4005/users/socialmediaauth/linkedin";
     const client_id = "78guq2rtxaouam";
     const client_secret = "tWZPBjm8WgX9ngaH";
 
@@ -226,8 +232,12 @@ export let handshake = async (code: string, state: string, res: Response) => {
     let data = result.data
 
     let access_token: ITokenModelLinkedin = new TokenLinkedin(data);
-
     await access_token.save();
+
+    let user = new User();
+    user.setLinkedinToken(data);
+    await user.save().catch(console.error);
+
 
     return;
 

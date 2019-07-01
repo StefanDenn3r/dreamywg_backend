@@ -1,6 +1,5 @@
 import {Document, Model, model, Schema} from "mongoose";
 
-
 interface IToken {
     _userId?: Schema.Types.ObjectId;
     token?: string;
