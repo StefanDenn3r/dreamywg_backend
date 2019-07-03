@@ -3,17 +3,18 @@ import {Document, Model, model, Schema} from "mongoose";
 enum Gender {
     MALE="MALE",
     FEMALE="FEMALE",
-    FLUID= "FLUID" // 2019 yolo
+    DIVERSE= "DIVERSE"
 }
 
 interface IUser {
-    email?: string;
-    password?: string;
-    firstName?: string;
-    lastName?: string;
-    phoneNumber?: string;
-    gender?: Gender;
-    dateOfBirth?: Date;
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+    phoneNumber: string;
+    gender: Gender;
+    dateOfBirth: Date;
+    jwt_token: string,
     hasOffers?: boolean; // to determine if the said user is an offerer
     isVerified: boolean
 }
@@ -28,9 +29,10 @@ export var UserSchema: Schema = new Schema({
     firstName: String,
     lastName: String,
     phoneNumber: String,
-    gender: {type: String, enum: this.Gender, default: Gender.FLUID},
+    gender: {type: String, enum: this.Gender, default: Gender.DIVERSE},
     dateOfBirth: Date,
     hasOffers: Boolean,
+    jwt_token: String,
     isVerified: {type: Boolean, default: false}
 }, {versionKey: false});
 
