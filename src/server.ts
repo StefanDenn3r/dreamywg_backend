@@ -13,6 +13,7 @@ import {APILogger, WinstonStream} from './utils/logger'
 
 
 import {UserRoute} from './users/userAPI'
+import {ChatRoute} from './chat/chatAPI'
 
 class Server {
     public app: express.Application;
@@ -63,6 +64,7 @@ class Server {
         });
 
         UserRoute.routes(this.app);
+        ChatRoute.routes(this.app);
         APILogger.logger.info('Applied Routes: [USER][AUTHENTICATION][BUSINESS LOGIC]')
     }
 

@@ -26,3 +26,8 @@ export let formatUser = (user) => {
     return user;
 };
 
+export let formatMessage = (messageUnit) => {
+    messageUnit = messageUnit.toJSON()
+
+
+}
