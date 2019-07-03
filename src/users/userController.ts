@@ -35,7 +35,7 @@ export let getUser = async (req: Request, res: Response, next: NextFunction) => 
 };
 
 
-export let addUser = (req: Request, res: Response, next: NextFunction) => {
+export let addUser = async (req: Request, res: Response, next: NextFunction) => {
     const newUser = new User(req.body);
 
     try {
@@ -44,14 +44,14 @@ export let addUser = (req: Request, res: Response, next: NextFunction) => {
         APILogger.logger.error(`[POST] [/users] something went wrong when saving a new user ${newUser.fullName()}  # ${err.message}`);
         next(err)
     }
-    return newUser.save((error, user) => {
+    return newUser.save(async (error, user) => {
         if (error) {
             APILogger.logger.error(`[POST] [/users] something went wrong when saving a new user ${newUser.fullName()} | ${error.message}`);
             return res.status(500).send(error)
         }
         user = halson(user.toJSON()).addLink('self', `/users/${user._id}`);
-        sendVerificationMail(user.id);
-        return formatOutput(res, user, 201, 'user')
+        await sendVerificationMail(user);
+        return formatOutput(res, user, 200, 'user')
     })
 };
 
@@ -92,15 +92,16 @@ export let removeUser = async (req: Request, res: Response, next: NextFunction) 
 export let login = async (req: Request, res: Response, next: NextFunction) => {
     const email = req.body.email;
     const password = req.body.password;
-    let user ;
-    try {
-        user = await User.findOne({email: email});
-        if (!user) {
-            APILogger.logger.info(`[GET] [/users/login] no user found with the email ${email}`);
-            return res.status(404).send()
-        }
-    } catch (e) {
-        return res.status(404).send()
+    let user;
+
+    user = await User.findOne({email: email});
+    if (!user) {
+        APILogger.logger.info(`[GET] [/users/login] no user found with the email ${email}`);
+        return res.status(404).send('User not found')
+    }
+
+    if (!user.isVerified) {
+        return res.status(205).send('Please verify you account first.')
     }
 
     const validate = bcrypt.compareSync(password, user.password.valueOf());
@@ -109,11 +110,16 @@ export let login = async (req: Request, res: Response, next: NextFunction) => {
         const body = {_id: user._id, email: user.email};
 
         const token = jwt.sign({user: body}, 'top_secret');
-
+        user.jwt_token = token;
+        try {
+            await user.save()
+        } catch (err) {
+            return res.status(500).send(err.message);
+        }
         return res.json({token: token})
     } else {
         APILogger.logger.info(`[GET] [/users/login] user not authorized ${email}`);
-        return res.status(401).send()
+        return res.status(401).send('Username and/or password don\'t match.')
     }
 };
 
