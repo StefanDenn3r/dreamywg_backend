@@ -9,7 +9,8 @@ import * as morgan from "morgan";
 import * as mongoose from "mongoose";
 import { APILogger, WinstonStream } from "./utils/logger";
 
-import { FlatOffererRoute } from "./preferences/flatOffererAPI";
+import { FlatOffererRoute } from "./flatOfferer/flatOffererAPI";
+import { FlatSeekerRoute } from "./flatSeeker/flatSeekerAPI";
 import { UserRoute } from "./users/userAPI";
 
 class Server {
@@ -76,6 +77,7 @@ class Server {
 
     UserRoute.routes(this.app);
     FlatOffererRoute.routes(this.app);
+    FlatSeekerRoute.routes(this.app);
     APILogger.logger.info(
       "Applied Routes: [USER][AUTHENTICATION][BUSINESS LOGIC]"
     );
