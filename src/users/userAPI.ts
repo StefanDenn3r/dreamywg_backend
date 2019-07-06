@@ -9,8 +9,6 @@ export class UserRoute {
         app.route('/users/:id').get(userController.getUser);
         app.route('/users').get(userController.getUsers);
         app.route('/users/login').post(userController.login);
-
         app.route('/confirmation/:token').get(userController.confirmEmail);
-        app.route('chat/:senderUserId/:receiverUserId').get(userController.retrieveChat);
     }
 }
