@@ -6,7 +6,6 @@ import {default as User, IUserModel} from './user'
 import {APILogger} from '../utils/logger'
 import {formatOutput, formatUser} from '../utils'
 import Token, {ITokenModel} from "../tokens/token";
-import MessageUnit, {MessageUnitModel} from "../chat/messageUnit";
 
 export let getUsers = async (req: Request, res: Response, next: NextFunction) => {
     let users = await User.find();
