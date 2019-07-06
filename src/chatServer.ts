@@ -1,8 +1,8 @@
 import { createServer, Server } from 'http';
 import * as express from 'express';
 import * as socketIo from 'socket.io';
-import * as mongoose from 'mongoose';
 import { Message } from './chat';
+import * as chatContoller from './chat/chatController';
 
 export class ChatServer {
     public static readonly PORT:number = 8080;
@@ -44,7 +44,10 @@ export class ChatServer {
             console.log('Connected client on port %s.', this.port);
             socket.on('message', (m: Message) => {
                 console.log('[server](message): %s', JSON.stringify(m));
-                this.io.emit('message', m);
+                this.io.emit('receive_message', m);
+                //store message on mongod
+                const message = JSON.parse(JSON.stringify(m));
+                chatContoller.storeChattoDB(message.user1, message.user2, message.content, message.timestamp);
             });
 
             socket.on('disconnect', () => {
