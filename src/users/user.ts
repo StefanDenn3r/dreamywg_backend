@@ -14,6 +14,7 @@ interface IUser {
     phoneNumber?: string;
     gender?: Gender;
     dateOfBirth?: Date;
+    residenceId?: string;
     hasOffers?: boolean; // to determine if the said user is an offerer
     isVerified: boolean
 }
@@ -30,6 +31,11 @@ export var UserSchema: Schema = new Schema({
     phoneNumber: String,
     gender: {type: String, enum: this.Gender, default: Gender.FLUID},
     dateOfBirth: Date,
+    residenceId: {type: String, default: '1'},
+    // TODO (Q) change into this after schema has been fixed
+    // residenceId:[
+    //     {type: Schema.Types.ObjectId, ref: 'Flat'}
+    // ],
     hasOffers: Boolean,
     isVerified: {type: Boolean, default: false}
 }, {versionKey: false});
