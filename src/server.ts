@@ -11,10 +11,12 @@ import {APILogger, WinstonStream} from './utils/logger'
 
 
 import {UserRoute} from './users/userAPI'
+import {FlatRoute} from './flats/flatAPI'
 
 class Server {
     public app: express.Application;
     public userRoutes: UserRoute = new UserRoute();
+    public flatRoutes: UserRoute = new FlatRoute();
     public env: string = process.env.NODE_ENV || 'development';
     public port: number | string;
     private mongoUrl: string = config.get('mongo.URI');
@@ -61,7 +63,8 @@ class Server {
         });
 
         UserRoute.routes(this.app);
-        APILogger.logger.info('Applied Routes: [USER][AUTHENTICATION][BUSINESS LOGIC]')
+        FlatRoute.routes(this.app);
+        APILogger.logger.info('Applied Routes: [USER][FLAT][AUTHENTICATION][BUSINESS LOGIC]')
     }
 
     private async mongoSetup() {
