@@ -2,7 +2,7 @@ import * as bcrypt from 'bcrypt'
 import {NextFunction, Request, Response} from 'express'
 import * as halson from 'halson'
 import * as jwt from 'jsonwebtoken'
-import {default as User, IUserModel} from './user'
+import {IUserModel, User} from './user'
 import {APILogger} from '../utils/logger'
 import {formatOutput, formatUser} from '../utils'
 import Token, {ITokenModel} from "../tokens/token";
@@ -55,12 +55,17 @@ export let addUser = async (req: Request, res: Response, next: NextFunction) => 
     })
 };
 
-export let updateUser = async (req: Request, res: Response, next: NextFunction) => {
-    const id = req.params.id;
+export let getUserByToken = async (token: String) => {
+    let user: IUserModel = await User.findOne({jwt_token: token});
+    return user
+}
 
+export let updateUser = async (req: Request, res: Response, next: NextFunction) => {
+    const token = req.header('Authorization');
+    const id = token
     APILogger.logger.info(`[PATCH] [/users] ${id}`);
 
-    let user: IUserModel = await User.findById(id);
+    let user: IUserModel = await User.findOne({jwt_token: token});
 
     if (!user) {
         APILogger.logger.info(`[PATCH] [/users/:{id}] user with id ${id} not found`);
@@ -89,6 +94,15 @@ export let removeUser = async (req: Request, res: Response, next: NextFunction) 
     return user.remove(() => res.status(204).send())
 };
 
+export let removeAllUsers = async (req: Request, res: Response, next: NextFunction) => {
+    APILogger.logger.warn(`[DELETE] [/users]`);
+
+    let users = await User.find();
+    await users.forEach(async (user) => await user.remove());
+
+    return res.status(204).send();
+};
+
 export let login = async (req: Request, res: Response, next: NextFunction) => {
     const email = req.body.email;
     const password = req.body.password;
@@ -101,7 +115,7 @@ export let login = async (req: Request, res: Response, next: NextFunction) => {
     }
 
     if (!user.isVerified) {
-        return res.status(205).send('Please verify you account first.')
+        return res.status(412).send('Please verify you account first.')
     }
 
     const validate = bcrypt.compareSync(password, user.password.valueOf());

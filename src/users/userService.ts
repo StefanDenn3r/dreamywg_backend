@@ -1,4 +1,4 @@
-import {default as User, IUserModel} from './user'
+import {User, IUserModel} from './user'
 import Token, {ITokenModel} from "../tokens/token";
 import * as crypto from 'crypto'
 import * as nodemailer from 'nodemailer'
