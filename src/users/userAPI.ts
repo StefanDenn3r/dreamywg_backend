@@ -1,5 +1,4 @@
 import * as userController from './userController'
-import * as userService from './userService'
 
 export class UserRoute {
     public static routes(app): void {
