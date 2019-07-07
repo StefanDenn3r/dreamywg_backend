@@ -26,8 +26,12 @@ export let formatUser = (user) => {
     return user;
 };
 
-export let formatMessage = (messageUnit) => {
-    messageUnit = messageUnit.toJSON()
+export let formatOutputChatList = (messageList) => {
+    messageList = messageList.toJSON()
 
 
-}
+};
+
+export let formatOutputChatUnit = (messageUnit) => {
+
+};

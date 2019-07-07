@@ -18,6 +18,7 @@ import {ChatRoute} from './chat/chatAPI'
 class Server {
     public app: express.Application;
     public userRoutes: UserRoute = new UserRoute();
+    public chatRoutes: ChatRoute = new ChatRoute();
     public env: string = process.env.NODE_ENV || 'development';
     public port: number | string;
     private mongoUrl: string = config.get('mongo.URI');
