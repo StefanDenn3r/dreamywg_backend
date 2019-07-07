@@ -42,7 +42,7 @@ export const FlatOffererSchema: Schema = new Schema(
   {
     location: String,
     rentType: String,
-    flatType: String,
+    flatshareType: String,
     nearbyStation: [String],
     nearbyStore: [String],
     miscellaneous: [String],
