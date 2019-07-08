@@ -1,12 +1,12 @@
 import {NextFunction, Request, Response} from "express";
-import * as halson from "halson";
-import {FlatOfferer, IFlatOffererModel} from "../users/user";
+import {FlatOfferer} from "./flatOfferer";
 import {APILogger} from "../utils/logger";
 import {formatOutput, formatUser} from "../utils";
 import {getUserByToken} from "../users/userController";
+import {Flat} from "../flats/flat";
 
 //TODO add try catch to every await
-export let getFlatofferers = async (
+export let getFlatOfferers = async (
     req: Request,
     res: Response,
     next: NextFunction
@@ -17,10 +17,10 @@ export let getFlatofferers = async (
         return res.status(404).send();
     }
 
-    return formatOutput(res, flatOfferer.map(formatUser), 200, "flatofferer");
+    return formatOutput(res, flatOfferer.map(formatUser), 200, "flatOfferer");
 };
 
-export let getFlatofferer = async (
+export let getFlatOfferer = async (
     req: Request,
     res: Response,
     next: NextFunction
@@ -29,85 +29,31 @@ export let getFlatofferer = async (
 
     APILogger.logger.info(`[GET] [/flatofferer] ${id}`);
 
-    let flatofferer = await FlatOfferer.findById(id);
-    if (!flatofferer) {
-        APILogger.logger.info(
-            `[GET] [/flatofferer/:{id}] flatofferer with id ${id} not found`
-        );
+    let flatOfferer = await FlatOfferer.findById(id);
+    if (!flatOfferer) {
+        APILogger.logger.info(`[GET] [/flatofferer/:{id}] flatofferer with id ${id} not found`);
         return res.status(404).send();
     }
-    return formatOutput(res, formatUser(flatofferer), 200, "flatofferer");
+    return formatOutput(res, formatUser(flatOfferer), 200, "flatOfferer");
 };
 
-export let addFlatofferer = async (req: Request, res: Response, next: NextFunction) => {
+export let addFlatOfferer = async (req: Request, res: Response, next: NextFunction) => {
     const user = await getUserByToken(req.header('Authorization'));
-    const newOfferer = new FlatOfferer(req.body);
-    newOfferer.user = user;
+    const flat = new Flat(req.body);
+    if (!user || !flat) {
+        APILogger.logger.info(`Something went wrong.`);
+        return res.status(404).send();
+    }
+
+    const flatOfferer = new FlatOfferer();
+    flatOfferer.user = user;
+    flatOfferer.flat = flat;
+
     try {
-        await newOfferer.save()
-        console.log('saved successfully')
+        await flatOfferer.save();
+        console.log(`Offerer successfully saved for user with email: ${flatOfferer.user.email}`);
         return res.status(200).send();
-
-    } catch (err) {
-        console.log('error occured')
-
-        return res.status(500).send(err.message);
+    } catch (e) {
+        APILogger.logger.info(`Something went wrong. Error: ${e}`);
     }
-    return newOfferer.save((error, user) => {
-        console.log("entered save callback")
-        if (error) {
-            APILogger.logger.error(
-                `[POST] [/users] something went wrong when saving a new flatofferer ${newOfferer} | ${
-                    error.message
-                    }`
-            );
-            return res.status(500).send(error);
-        }
-        user = halson(user.toJSON()).addLink(
-            "self",
-            `/flatofferer/${newOfferer._id}`
-        );
-        return formatOutput(res, user, 201, "flatofferer");
-    });
-};
-
-export let updateUser = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
-    const id = req.params.id;
-
-    APILogger.logger.info(`[PATCH] [/flatofferer] ${id}`);
-
-    let offerer: IFlatOffererModel = await FlatOfferer.findById(id);
-
-    if (!offerer) {
-        APILogger.logger.info(
-            `[PATCH] [/flatofferer/:{id}] flatofferer with id ${id} not found`
-        );
-        return res.status(404).send();
-    }
-
-    return offerer.save(() => res.status(204).send());
-};
-
-export let removeUser = async (
-    req: Request,
-    res: Response,
-    next: NextFunction
-) => {
-    const id = req.params.id;
-
-    APILogger.logger.warn(`[DELETE] [/flatofferer] ${id}`);
-
-    let oferrer = await FlatOfferer.findById(id);
-    if (!oferrer) {
-        APILogger.logger.info(
-            `[DELETE] [/flatofferer/:{id}] flatofferer with id ${id} not found`
-        );
-        return res.status(404).send();
-    }
-
-    return oferrer.remove(() => res.status(204).send());
 };
