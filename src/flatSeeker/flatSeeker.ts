@@ -1,81 +1,152 @@
-import { Document, Model, model, Schema } from "mongoose";
+import {FlatshareExperience, flatshareType, genderRestrictions, Occupations, rentType} from "../utils/selectionEnums";
+import {Document, model, Model, models, Schema} from "mongoose";
+import {IUser} from "../users/user";
 
-interface Roommate {
-  nationality: string;
-  age: number;
-  occupation: string;
-  description: string;
-}
-
-enum GENDER {
-  MALE_ONLY = "MALE_ONLY",
-  FEMALE_ONLY = "FEMALE_ONLY",
-  BOTH = "BOTH"
-}
-
-interface ISeeker {
-  location?: string;
-  rentType?: string;
-  flatType?: string;
-  nearbyStation?: [string];
-  nearbyStore?: [string];
-  miscellaneous?: [string];
-  flooring?: [string];
-  photo?: boolean;
-  roommate?: [Roommate];
-  gender?: GENDER;
-  minAge?: number;
-  maxAge?: number;
-  occupation?: string;
-  flatshareExperience: string;
-  practiceOfAbstaining: string;
-  cleanliness: string;
-  cleaningSchedule: string;
-  activities: [string];
-  smokersAllowed: boolean;
-  petsAllowed: boolean;
-}
-
-export interface ISeekerModel extends ISeeker, Document {}
-
-export const FlatSeekerSchema: Schema = new Schema(
-  {
-    location: String,
-    rentType: String,
-    flatshareType: String,
-    nearbyStation: [String],
-    nearbyStore: [String],
-    miscellaneous: [String],
-    flooring: [String],
-    photo: { data: Buffer, contentType: String },
-    roommate: [
-      {
-        nationality: String,
+/**
+ * FlatSeeker
+ */
+interface IFlatSeeker {
+    user: IUser,
+    personalInformation: {
+        occupation: Occupations,
+        field: String,
+        flatshareExperience: FlatshareExperience,
+        languages: [String],
+        practiceOfAbstaining: [String],
+        hobbies: [String],
         age: Number,
-        occupation: String,
-        description: String
-      }
-    ],
-    gender: { type: String, enum: this.GENDER, default: GENDER.BOTH },
-    minAge: Number,
-    maxAge: Number,
-    occupation: String,
-    flatshareExperience: String,
-    practiceOfAbstaining: String,
-    cleanliness: String,
-    cleaningSchedule: String,
-    activities: [String],
-    smokersAllowed: Boolean,
-    petsAllowed: Boolean
-  },
-  { versionKey: false }
-);
+        socialMedia: String
+        description: String,
+        smoker: Boolean,
+        pets: Boolean,
+        weekendAbsent: Boolean,
+        image: ArrayBuffer
+    },
+    preferences: {
+        flat: {
+            regions: [String],
+            stations: [String],
+            stores: [String],
+            flatshareType: flatshareType,
+            room: {
+                size: {
+                    from: Number,
+                    to: Number,
+                }
+                rent: {
+                    from: Number,
+                    to: Number,
+                }
+                rentType: rentType,
+                dateAvailable: [Date],
+                furnished: Boolean,
+            }
+        },
+        flatEquipment: {
+            parkingLot: Boolean,
+            livingroom: Boolean,
+            shower: Boolean,
+            bathtub: Boolean,
+            kitchen: Boolean,
+            internet: Boolean,
+            balcony: Boolean,
+            terrace: Boolean,
+            garden: Boolean,
+            washingMachine: Boolean,
+            dishwasher: Boolean,
+        },
+        flatmates: {
+            amount: {
+                from: Number,
+                to: Number,
+            },
+            age: {
+                from: Number,
+                to: Number,
+            },
 
-// // transformer : should be separated in different file if big enough
-// FlatSeekerSchema.set("toJSON");
-//
-// const FlatSeeker: Model<ISeekerModel> = model(
-//   "FlatSeeker",
-//   FlatSeekerSchema
-// );
-// export default FlatSeeker;
+        },
+        genderRestriction: genderRestrictions,
+        cleanliness: String
+        cleaningSchedule: String
+        activities: [String]
+        smokers: Boolean
+        pets: Boolean
+    }
+}
+
+
+export interface IFlatSeekerModel extends IFlatSeeker, Document {
+}
+
+export const FlatSeekerSchema = new Schema({
+    user: {type: Schema.Types.ObjectId, ref: 'User'},
+    personalInformation: {
+        occupation: {type: String, enum: this.Occupations},
+        field: String,
+        flatshareExperience: {type: String, enum: this.FlatshareExperience},
+        languages: [String],
+        practiceOfAbstaining: [String],
+        hobbies: [String],
+        age: Number,
+        socialMedia: String,
+        description: String,
+        smoker: {type: Boolean, default: false},
+        pets: {type: Boolean, default: false},
+        weekendAbsent: {type: Boolean, default: false},
+        image:{data: Buffer, contentType: String}
+    },
+    preferences: {
+        flat: {
+            regions: [String],
+            stations: [String],
+            stores: [String],
+            flatshareType: {type: String, enum: this.flatshareType},
+            room: {
+                size: {
+                    from: Number,
+                    to: Number,
+                },
+                rent: {
+                    from: Number,
+                    to: Number,
+                },
+                rentType: {type: String, enum: this.rentType},
+                dateAvailable: [Date],
+                furnished: {type: Boolean, default: false},
+            }
+        },
+        flatEquipment: {
+            parkingLot: {type: Boolean, default: false},
+            livingroom: {type: Boolean, default: false},
+            shower: {type: Boolean, default: false},
+            bathtub: {type: Boolean, default: false},
+            kitchen: {type: Boolean, default: false},
+            internet: {type: Boolean, default: false},
+            balcony: {type: Boolean, default: false},
+            terrace: {type: Boolean, default: false},
+            garden: {type: Boolean, default: false},
+            washingMachine: {type: Boolean, default: false},
+            dishwasher: {type: Boolean, default: false},
+        },
+        flatmates: {
+            amount: {
+                from: Number,
+                to: Number,
+            },
+            age: {
+                from: Number,
+                to: Number,
+            },
+        },
+        genderRestriction: {type: String, enum: this.genderRestrictions},
+        cleanliness: String,
+        cleaningSchedule: String,
+        activities: [String],
+        smokers: {type: Boolean, default: false},
+        pets: {type: Boolean, default: false},
+    }
+});
+
+
+export const FlatSeeker: Model<IFlatSeekerModel> = models.FlatSeeker || model<IFlatSeekerModel>("FlatSeeker", FlatSeekerSchema);
