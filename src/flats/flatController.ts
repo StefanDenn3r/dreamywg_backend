@@ -1,5 +1,5 @@
 import {NextFunction, Request, Response} from 'express'
-import User from '../users/user'
+import {User} from '../users/user'
 import {formatOutput, formatUser} from '../utils'
 import {APILogger} from '../utils/logger'
 
@@ -34,5 +34,5 @@ export let getFlatResidents = async (req: Request, res: Response, next: NextFunc
         APILogger.logger.info(`Exception when getting residents with flat id ${id}`);
         return res.status(404).send()
     }
-    
+
 };
