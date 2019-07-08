@@ -71,11 +71,11 @@ export const FlatSeekerSchema: Schema = new Schema(
   { versionKey: false }
 );
 
-// transformer : should be separated in different file if big enough
-FlatSeekerSchema.set("toJSON");
-
-const FlatSeeker: Model<ISeekerModel> = model(
-  "FlatSeeker",
-  FlatSeekerSchema
-);
-export default FlatSeeker;
+// // transformer : should be separated in different file if big enough
+// FlatSeekerSchema.set("toJSON");
+//
+// const FlatSeeker: Model<ISeekerModel> = model(
+//   "FlatSeeker",
+//   FlatSeekerSchema
+// );
+// export default FlatSeeker;
