@@ -51,6 +51,7 @@ interface IUser {
     phoneNumber: string;
     gender: Gender;
     dateOfBirth: Date;
+    residenceId?: string;
     isVerified: boolean;
 }
 
@@ -66,7 +67,12 @@ export var UserSchema: Schema = new Schema({
     lastName: String,
     phoneNumber: String,
     gender: {type: String, enum: this.Gender},
+    // TODO (Q) change into this after schema has been fixed
+    // residenceId:[
+    //     {type: Schema.Types.ObjectId, ref: 'Flat'}
+    // ],
     dateOfBirth: Date,
+    residenceId: {type: String, default: '1'},
     isVerified: {type: Boolean, default: false}
 }, {versionKey: false});
 
