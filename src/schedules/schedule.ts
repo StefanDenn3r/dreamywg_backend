@@ -2,11 +2,11 @@ import {Document, Model, model, Schema} from "mongoose";
 
 //TODO (Q) wait for flat offerer registration
 interface ISchedule {
-    timeslots: [];
+    timeslots: ITimeSlot[];
 }
 
 // TODO (Q) how should I use this?
-interface ITimeSlot {
+export interface ITimeSlot {
     dateTime: Date;
     userId: string;
 }
@@ -15,8 +15,8 @@ export interface IScheduleModel extends ISchedule, Document {
 
 }
 
-var TimeSlotSchema: Schema = new Schema({
-    dateTime: {
+export var TimeSlotSchema: Schema = new Schema({
+    time: {
         type: Date,
         default: Date(),
         unique: true
@@ -28,6 +28,11 @@ var TimeSlotSchema: Schema = new Schema({
 })
 
 export var ScheduleSchema: Schema = new Schema({
+    date: {
+        type: Date,
+        default: Date(),
+        unique: true
+    },
     timeslots: {
         type: [TimeSlotSchema],
         default: []
