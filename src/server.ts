@@ -9,9 +9,9 @@ import * as morgan from 'morgan'
 import * as mongoose from 'mongoose'
 import {APILogger, WinstonStream} from './utils/logger'
 
-
 import {UserRoute} from './users/userAPI'
 import {FlatRoute} from './flats/flatAPI'
+import {ScheduleRoute} from './schedules/scheduleAPI'
 
 class Server {
     public app: express.Application;
@@ -64,6 +64,7 @@ class Server {
 
         UserRoute.routes(this.app);
         FlatRoute.routes(this.app);
+        ScheduleRoute.routes(this.app);
         APILogger.logger.info('Applied Routes: [USER][FLAT][AUTHENTICATION][BUSINESS LOGIC]')
     }
 

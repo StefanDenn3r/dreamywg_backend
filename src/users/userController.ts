@@ -66,7 +66,7 @@ export let updateUser = async (req: Request, res: Response, next: NextFunction) 
         APILogger.logger.info(`[PATCH] [/users/:{id}] user with id ${id} not found`);
         return res.status(404).send()
     }
-
+    
     user.firstName = req.body.firstName || user.firstName;
     user.lastName = req.body.lastName || user.lastName;
     user.email = req.body.email || user.email;
