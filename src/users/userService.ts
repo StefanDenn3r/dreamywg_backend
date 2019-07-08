@@ -19,7 +19,7 @@ export let sendVerificationMail = async (user) => {
         subject: 'Account Verification Token',
         text: `Hello,\n\n Please verify your account by clicking the link: \nhttp://${config.get('host')}:${config.get('frontend_port')}/confirmation/${token.token}\n`
     };
-    transporter.sendMail(mailOptions)
+    await transporter.sendMail(mailOptions)
 };
 
 
