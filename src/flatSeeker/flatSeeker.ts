@@ -38,7 +38,8 @@ interface IFlatSeeker {
                     to: Number,
                 }
                 rentType: rentType,
-                dateAvailable: [Date],
+                dateAvailableRange: [Date],
+                dateAvailable: Date,
                 furnished: Boolean,
             }
         },
@@ -111,7 +112,8 @@ export const FlatSeekerSchema = new Schema({
                     to: Number,
                 },
                 rentType: {type: String, enum: this.rentType},
-                dateAvailable: [Date],
+                dateAvailableRange: [Date],
+                dateAvailable: Date,
                 furnished: {type: Boolean, default: false},
             }
         },
