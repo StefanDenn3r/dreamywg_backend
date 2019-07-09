@@ -45,14 +45,14 @@ export interface IFlat {
         hobbies: [String],
         socialMedia: String
     }],
-    room: {
+    room: [{
         roomSize: Number,
         rent: Number,
         rentType: rentType,
         dateAvailable: [Date],
         furnished: Boolean,
         images: [ArrayBuffer]
-    },
+    }],
     flatmatePreferences: {
         gender: Gender,
         age: {
@@ -108,14 +108,14 @@ export const FlatSchema = new Schema({
         hobbies: [String],
         socialMedia: String
     }],
-    room: {
+    room: [{
         roomSize: Number,
         rent: Number,
         rentType: {type: String, enum: this.rentType},
         dateAvailable: [Date],
         furnished: {type: Boolean, default: false},
         images: [{data: Buffer, contentType: String}]
-    },
+    }],
     flatmatePreferences: {
         gender: {type: String, enum: this.Gender},
         age: {

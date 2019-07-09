@@ -75,7 +75,6 @@ interface IFlatSeeker {
     }
 }
 
-
 export interface IFlatSeekerModel extends IFlatSeeker, Document {
 }
 
