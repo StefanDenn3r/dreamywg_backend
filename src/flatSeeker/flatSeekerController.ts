@@ -3,6 +3,17 @@ import {FlatSeeker} from "./flatSeeker";
 import {APILogger} from "../utils/logger";
 import {formatOutput, formatUser} from "../utils";
 import {getUserByToken} from "../users/userController";
+import {Flat} from "../flats/flat";
+import {match} from "./flatSeekerService";
+
+export let searchFlats = async (req: Request, res: Response) => {
+    const user = await getUserByToken(req.header('Authorization'));
+    const flatSeeker = await FlatSeeker.findOne({user: user});
+    const flats = await Flat.find();
+    // todo: modify flatSeeker with respect to search request
+    match(flatSeeker, flats)
+}
+
 
 //TODO add try catch to every await
 export let getFlatSeekers = async (req: Request, res: Response) => {
