@@ -45,7 +45,7 @@ export interface IFlat {
         hobbies: [String],
         socialMedia: String
     }],
-    room: [{
+    rooms: [{
         roomSize: Number,
         rent: Number,
         rentType: rentType,
@@ -109,7 +109,7 @@ export const FlatSchema = new Schema({
         hobbies: [String],
         socialMedia: String
     }],
-    room: [{
+    rooms: [{
         roomSize: Number,
         rent: Number,
         rentType: {type: String, enum: this.rentType},
