@@ -11,7 +11,7 @@ export let searchFlats = async (req: Request, res: Response) => {
     const flatSeeker = await FlatSeeker.findOne({user: user});
     const flats = await Flat.find();
     // todo: modify flatSeeker with respect to search request
-    match(flatSeeker, flats)
+    res.status(200).send(match(flatSeeker, flats))
 }
 
 
