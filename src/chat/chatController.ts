@@ -41,6 +41,8 @@ export let retrieveChatUnit = async (req:Request, res: Response, next: NextFunct
 
 export let storeChattoDB = async (user1: string, user2: string, content: string, timestamp: Date) => {
     //check message existence
+
+    console.log("storing chat to db");
     let chatUnit = await MessageUnit.findOne({ $or: [{$and:  [{user1: user1}, {user2: user2}]}, {$and:  [{user1: user2}, {user2: user1}]}]});
     //create new random message id
     if (!chatUnit) {
