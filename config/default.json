@@ -1,6 +1,6 @@
 {
   "name": "api",
-  "port": 4007,
+  "port": 4005,
   "frontend_port": 3000,
   "host": "localhost",
   "mongo": {
