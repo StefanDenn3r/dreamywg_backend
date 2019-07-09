@@ -49,7 +49,8 @@ export interface IFlat {
         roomSize: Number,
         rent: Number,
         rentType: rentType,
-        dateAvailable: [Date],
+        dateAvailableRange: [Date],
+        dateAvailable: Date,
         furnished: Boolean,
         images: [ArrayBuffer]
     }],
@@ -112,7 +113,8 @@ export const FlatSchema = new Schema({
         roomSize: Number,
         rent: Number,
         rentType: {type: String, enum: this.rentType},
-        dateAvailable: [Date],
+        dateAvailableRange: [Date],
+        dateAvailable: Date,
         furnished: {type: Boolean, default: false},
         images: [{data: Buffer, contentType: String}]
     }],
