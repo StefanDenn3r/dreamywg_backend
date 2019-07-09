@@ -11,9 +11,9 @@ interface IFlatSeeker {
         occupation: Occupations,
         field: String,
         flatshareExperience: FlatshareExperience,
-        languages: [String],
-        practiceOfAbstaining: [String],
-        hobbies: [String],
+        languages: String[],
+        practiceOfAbstaining: String[],
+        hobbies: String[],
         age: Number,
         socialMedia: String
         description: String,
@@ -24,9 +24,9 @@ interface IFlatSeeker {
     },
     preferences: {
         flat: {
-            regions: [String],
-            stations: [String],
-            stores: [String],
+            regions: String[],
+            stations: String[],
+            stores: String[],
             flatshareType: flatshareType,
             room: {
                 size: {
@@ -38,7 +38,7 @@ interface IFlatSeeker {
                     to: Number,
                 }
                 rentType: rentType,
-                dateAvailableRange: [Date],
+                dateAvailableRange: Date[],
                 dateAvailable: Date,
                 furnished: Boolean,
             }
@@ -70,7 +70,7 @@ interface IFlatSeeker {
         genderRestriction: genderRestrictions,
         cleanliness: String
         cleaningSchedule: String
-        activities: [String]
+        activities: String[]
         smokers: Boolean
         pets: Boolean
     }

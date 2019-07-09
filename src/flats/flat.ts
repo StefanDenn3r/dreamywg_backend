@@ -12,12 +12,15 @@ import {
  * Flat
  */
 export interface IFlat {
-    region: string,
-    street: string,
-    houseNr: number,
-    flatSize: number,
-    stations: [string],
-    stores: [string],
+    title: String,
+    shortDescription: String,
+    longDescription: String,
+    region: String,
+    street: String,
+    houseNr: Number,
+    flatSize: Number,
+    stations: String[],
+    stores: String[],
     flatshareType: flatshareType,
     genderRestriction: genderRestrictions,
     flatEquipment: {
@@ -38,21 +41,21 @@ export interface IFlat {
         lastName: String,
         age: Number,
         description: String,
-        languages: [String],
-        practiceOfAbstaining: [String],
+        languages: String[],
+        practiceOfAbstaining: String[],
         occupation: Occupations,
         field: String,
-        hobbies: [String],
+        hobbies: String[],
         socialMedia: String
     }],
     rooms: [{
         roomSize: Number,
         rent: Number,
         rentType: rentType,
-        dateAvailableRange: [Date],
+        dateAvailableRange: Date[],
         dateAvailable: Date,
         furnished: Boolean,
-        images: [ArrayBuffer]
+        images: ArrayBuffer[]
     }],
     flatmatePreferences: {
         gender: Gender,
@@ -62,10 +65,10 @@ export interface IFlat {
         }
         occupations: Occupations,
         flatshareExperience: FlatshareExperience,
-        practiceOfAbstaining: [String],
+        practiceOfAbstaining: String[],
         cleanliness: String,
         cleaningSchedule: String,
-        activities: [String],
+        activities: String[],
         smokersAllowed: Boolean,
         petsAllowed: Boolean,
         weekendAbsent: Boolean
@@ -76,6 +79,9 @@ export interface IFlatModel extends IFlat, Document {
 }
 
 export const FlatSchema = new Schema({
+    title: String,
+    shortDescription: String,
+    longDescription: String,
     region: String,
     street: String,
     houseNr: Number,
