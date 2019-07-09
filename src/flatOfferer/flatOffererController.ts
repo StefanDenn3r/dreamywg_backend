@@ -13,7 +13,7 @@ export let getFlatOfferers = async (
 ) => {
     let flatOfferer = await FlatOfferer.find();
     if (!flatOfferer) {
-        APILogger.logger.info(`[GET] [/users] something went wrong`);
+        APILogger.logger.info(`[GET] [/flatofferers] something went wrong`);
         return res.status(404).send();
     }
 
@@ -50,6 +50,7 @@ export let addFlatOfferer = async (req: Request, res: Response, next: NextFuncti
     flatOfferer.flat = flat;
 
     try {
+        await flat.save();
         await flatOfferer.save();
         console.log(`Offerer successfully saved for user with email: ${flatOfferer.user.email}`);
         return res.status(200).send();

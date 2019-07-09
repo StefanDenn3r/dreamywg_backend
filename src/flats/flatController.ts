@@ -2,14 +2,31 @@ import {NextFunction, Request, Response} from 'express'
 import {User} from '../users/user'
 import {formatOutput, formatUser} from '../utils'
 import {APILogger} from '../utils/logger'
+import {Flat} from "./flat";
+import {FlatOfferer} from "../flatOfferer/flatOfferer";
 
 //TODO (Q) wait for flat offerer registration
 export let getFlats = async (req: Request, res: Response, next: NextFunction) => {
-    return {}
+    let flats = await Flat.find();
+    if (!flats) {
+        APILogger.logger.info(`[GET] [/flats] something went wrong`);
+        return res.status(404).send();
+    }
+
+    return formatOutput(res, flats, 200, "flats");
 };
 
 export let getFlat = async (req: Request, res: Response, next: NextFunction) => {
-    return {}
+    const id = req.params.id;
+
+    APILogger.logger.info(`[GET] [/flats/] ${id}`);
+
+    let flat = await Flat.findById(id);
+    if (!flat) {
+        APILogger.logger.info(`[GET] [/flats/:{id}] flats with id ${id} not found`);
+        return res.status(404).send();
+    }
+    return formatOutput(res, flat, 200, "flat");
 };
 
 
