@@ -10,10 +10,19 @@ interface ISchedule {
 export interface ITimeSlot {
     time: Date;
     userId: string;
+    status: InterviewStatus;
 }
 
 export interface IScheduleModel extends ISchedule, Document {
 
+}
+
+enum InterviewStatus {
+    IDLE="IDLE", // if no user book the time slot
+    BOOKED="BOOKED", // if there's a user book the time slot
+    ACCEPTED= "ACCEPTED", // user is accepted
+    REJECTED= "REJECTED", // user is rejected
+    NO_SHOW= "NO_SHOW" // user is not coming to interview
 }
 
 export var TimeSlotSchema: Schema = new Schema({
@@ -25,6 +34,11 @@ export var TimeSlotSchema: Schema = new Schema({
     userId: {
         type: Schema.Types.ObjectId,
         ref: 'User'
+    },
+    status: {
+        type: String, 
+        enum: this.InterviewStatus,
+        default: InterviewStatus.IDLE
     }
 })
 
