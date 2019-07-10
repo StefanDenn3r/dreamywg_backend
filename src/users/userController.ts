@@ -130,7 +130,11 @@ export let login = async (req: Request, res: Response, next: NextFunction) => {
         } catch (err) {
             return res.status(500).send(err.message);
         }
-        return res.json({token: token})
+
+        return res.json({
+            token: token,
+            type: user.type
+        })
     } else {
         APILogger.logger.info(`[GET] [/users/login] user not authorized ${email}`);
         return res.status(401).send('Username and/or password don\'t match.')
