@@ -1,12 +1,11 @@
-import {default as User, IUserModel} from './user'
+import {User, IUserModel} from './user'
 import Token, {ITokenModel} from "../tokens/token";
 import * as crypto from 'crypto'
 import * as nodemailer from 'nodemailer'
 import * as config from 'config'
 
 
-export let sendVerificationMail = async (userId) => {
-    let user: IUserModel = await User.findById(userId);
+export let sendVerificationMail = async (user) => {
     let token: ITokenModel = new Token({_userId: user._id, token: crypto.randomBytes(16).toString('hex')});
 
     await token.save();
@@ -18,9 +17,9 @@ export let sendVerificationMail = async (userId) => {
         from: nodemailerOptions.auth.user,
         to: user.email,
         subject: 'Account Verification Token',
-        text: `Hello,\n\n' Please verify your account by clicking the link: \nhttp:// ${config.get('host')}:${config.get('port')}/confirmation?token=${token.token}.\n`
+        text: `Hello,\n\n Please verify your account by clicking the link: \nhttp://${config.get('host')}:${config.get('frontend_port')}/confirmation/${token.token}\n`
     };
-    transporter.sendMail(mailOptions)
+    await transporter.sendMail(mailOptions)
 };
 
 
