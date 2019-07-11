@@ -3,7 +3,6 @@ import {User} from '../users/user'
 import {formatOutput, formatUser} from '../utils'
 import {APILogger} from '../utils/logger'
 import {Flat} from "./flat";
-import {FlatOfferer} from "../flatOfferer/flatOfferer";
 
 //TODO (Q) wait for flat offerer registration
 export let getFlats = async (req: Request, res: Response, next: NextFunction) => {
@@ -29,14 +28,31 @@ export let getFlat = async (req: Request, res: Response, next: NextFunction) => 
     return formatOutput(res, flat, 200, "flat");
 };
 
+export let addFlat = async (req: Request, res: Response, next: NextFunction) => {
+    const flat = new Flat(req.body);
+    if (!flat) {
+        APILogger.logger.info(`Something went wrong.`);
+        return res.status(404).send();
+    }
 
-export let addFlat = (req: Request, res: Response, next: NextFunction) => {
-    return {}
+    try {
+        await flat.save();
+        console.log(`Flat added successfully`);
+        return res.status(200).send();
+    } catch (e) {
+        APILogger.logger.info(`Something went wrong. Error: ${e}`);
+    }
 };
 
-export let updateFlat = async (req: Request, res: Response, next: NextFunction) => {
-    return {}
+export let removeAllFlats = async (req: Request, res: Response) => {
+    APILogger.logger.warn(`[DELETE] [/flats]`);
+
+    let flats = await Flat.find();
+    await flats.forEach(async (flats) => await flats.remove());
+
+    return res.status(204).send();
 };
+
 
 export let getFlatResidents = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
