@@ -42,15 +42,13 @@ export let retrieveChatUnit = async (req:Request, res: Response, next: NextFunct
 export let storeChattoDB = async (user1: string, user2: string, content: string, timestamp: Date) => {
     //check message existence
 
-    console.log("storing chat to db", user1, user2, content, timestamp);
     let chatUnit = await MessageUnit.findOne({ $or: [{$and:  [{user1: user1}, {user2: user2}]}, {$and:  [{user1: user2}, {user2: user1}]}]});
     //create new random message id
     console.log(chatUnit)
     if (!chatUnit) {
         //create random message id
         console.log("create new chat");
-        let messageId = new ObjectId();
-        createNewChat(messageId, user1, user2, content, timestamp);
+        createNewChat(user1, user2, content, timestamp);
     }else{
         console.log("update chat1");
         let messageId = chatUnit._id;
@@ -60,29 +58,30 @@ export let storeChattoDB = async (user1: string, user2: string, content: string,
 };
 
 export let updateChat = async(messageId, user1, user2, content, timestamp) => {
-    console.log("update chat2")
     const id = messageId;
-    console.log("id", id)
+
     let message: MessageUnitModel = await MessageUnit.findById(id);
 
     if (!message) {
         APILogger.logger.info(`message not found`);
     }
-    message.update({_messageId: messageId}, {$push: {messages: {content: content, timestamp: timestamp }}});
+    message.update({_id: messageId}, {$push: {messages: {content: content, timestamp: timestamp }}});
 
 };
 
-export let createNewChat = async (messageId, user1, user2, content, timestamp) => {
+export let createNewChat = async (user1, user2, content, timestamp) => {
     let newMessage = new MessageUnit({
-        _messageId: messageId,
         user1: user1,
         user2: user2,
-        content: content,
-        timestamp: timestamp
+        messages: [{
+            content: content,
+            timestamp: timestamp
+        }]
     });
 
     try {
         await newMessage.save().catch(console.error);
+
     } catch (err) {
         APILogger.logger.error(`[POST] [/users] something went wrong when saving a new message # ${err.message}`);
         //next(err)
@@ -90,7 +89,7 @@ export let createNewChat = async (messageId, user1, user2, content, timestamp) =
 };
 
 export let deleteChat = async (req:Request, res: Response, next: NextFunction) => {
-    const id = req.query.id;
+    const id = req.query._id;
 
     APILogger.logger.warn(`[DELETE] [/users] ${id}`);
 
