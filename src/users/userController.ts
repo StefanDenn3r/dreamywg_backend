@@ -37,7 +37,6 @@ export let getUser = async (req: Request, res: Response, next: NextFunction) => 
 
 export let addUser = async (req: Request, res: Response, next: NextFunction) => {
     const newUser = new User(req.body);
-
     try {
         newUser.password = bcrypt.hashSync(newUser.password, 10)
     } catch (err) {
