@@ -1,4 +1,5 @@
 import {NextFunction, Request, Response} from "express";
+import {User} from "../users/user";
 import {formatOutput} from "../utils";
 import {APILogger} from "../utils/logger";
 import MessageUnit, {MessageUnitModel} from "./messageUnit";
@@ -86,4 +87,19 @@ export let createNewChat = async (messageId, user1, user2, content, timestamp) =
         APILogger.logger.error(`[POST] [/users] something went wrong when saving a new message # ${err.message}`);
         //next(err)
     }
+};
+
+export let deleteChat = async (req:Request, res: Response, next: NextFunction) => {
+    const id = req.query.id;
+
+    APILogger.logger.warn(`[DELETE] [/users] ${id}`);
+
+    let messageunit = await MessageUnit.findById(id);
+    if (!messageunit) {
+        APILogger.logger.info(`[DELETE] [/users/:{id}] message not found`);
+        return res.status(404).send()
+    }
+
+    return messageunit.remove(() => res.status(204).send())
+
 };
