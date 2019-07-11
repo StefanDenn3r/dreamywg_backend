@@ -13,7 +13,7 @@ import {FlatOffererRoute} from "./flatOfferer/flatOffererAPI";
 import {FlatSeekerRoute} from "./flatSeeker/flatSeekerAPI";
 import {UserRoute} from "./users/userAPI";
 import {FlatRoute} from './flats/flatAPI';
-import {ChatRoute} from './chat/chatAPI'
+import {ChatRoute} from './chat/chatAPI';
 
 class Server {
     public app: express.Application;
