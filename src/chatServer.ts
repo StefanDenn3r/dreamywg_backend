@@ -1,8 +1,11 @@
 import { createServer, Server } from 'http';
 import * as express from 'express';
+import * as mongoose from "mongoose";
 import * as socketIo from 'socket.io';
 import { Message } from './chat';
 import * as chatContoller from './chat/chatController';
+import {APILogger} from "./utils/logger";
+import * as config from "config";
 
 export class ChatServer {
     public static readonly PORT:number = 8080;
@@ -10,6 +13,7 @@ export class ChatServer {
     private server: Server;
     private io: socketIo.Server;
     private port: string | number;
+    private mongoUrl: string = config.get('mongo.URI');
 
     constructor() {
         this.createApp();
@@ -25,14 +29,16 @@ export class ChatServer {
 
     private createServer(): void {
         this.server = createServer(this.app);
+
     }
 
     private config(): void {
         this.port = process.env.PORT || ChatServer.PORT;
     }
 
-    private sockets(): void {
+    private async sockets(){
         this.io = socketIo(this.server);
+        await this.mongoSetup();
     }
 
     private listen(): void {
@@ -47,6 +53,7 @@ export class ChatServer {
                 this.io.emit('receive_message', m);
                 //store message on mongod
                 const message = JSON.parse(JSON.stringify(m));
+                console.log("storing chat to db 1")
                 chatContoller.storeChattoDB(message.user1, message.user2, message.content, message.timestamp);
             });
 
@@ -55,7 +62,18 @@ export class ChatServer {
             });
         });
     }
-
+    private async mongoSetup() {
+        try {
+            await mongoose.connect(this.mongoUrl, {socketOptions: config.get("mongo.config")});
+            APILogger.logger.info(
+                `Connection to MongoDB at ${this.mongoUrl} established`
+            );
+        } catch (err) {
+            APILogger.logger.error(
+                `Connection to MONGO DB failed : ${err} - Shutting down Server`
+            );
+        }
+    }
     public getApp(): express.Application {
         return this.app;
     }
