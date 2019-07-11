@@ -6,15 +6,14 @@ import { ObjectId } from "bson";
 
 export let retrieveChatList = async (req:Request, res: Response, next: NextFunction) => {
     console.log("calling retrieve chat list backend")
-    const userId = req.params.userId;
+    const userId = req.query.userId;
+    console.log("userid", userId);
     let messageList = await MessageUnit.aggregate([{$match: { $or: [{user1: userId}, {user2: userId}]}},{ $sort : { "messages.timestamp": 1} }, {$project: {_messageId:1, user1:1, user2:1, messages: {$slice:["$messages", -1]}}}], (err, data) => {
         if (data) {
             //res.status(400).send(err)
             console.log(data)
             return formatOutput(res, data, 201, 'chatlist')
         } else {
-            //do sort based on timestamp and show to frontend the most recent message text
-            //
             console.log("data not found");
             return res.status(400).send(err)
         }
@@ -42,22 +41,27 @@ export let retrieveChatUnit = async (req:Request, res: Response, next: NextFunct
 export let storeChattoDB = async (user1: string, user2: string, content: string, timestamp: Date) => {
     //check message existence
 
-    console.log("storing chat to db");
+    console.log("storing chat to db", user1, user2, content, timestamp);
     let chatUnit = await MessageUnit.findOne({ $or: [{$and:  [{user1: user1}, {user2: user2}]}, {$and:  [{user1: user2}, {user2: user1}]}]});
     //create new random message id
+    console.log(chatUnit)
     if (!chatUnit) {
         //create random message id
+        console.log("create new chat");
         let messageId = new ObjectId();
         createNewChat(messageId, user1, user2, content, timestamp);
     }else{
-        let messageId = chatUnit._messageId;
+        console.log("update chat1");
+        let messageId = chatUnit._id;
+        console.log("messageid", messageId)
         updateChat(messageId, user1, user2, content, timestamp);
     }
 };
 
 export let updateChat = async(messageId, user1, user2, content, timestamp) => {
+    console.log("update chat2")
     const id = messageId;
-
+    console.log("id", id)
     let message: MessageUnitModel = await MessageUnit.findById(id);
 
     if (!message) {
@@ -67,11 +71,11 @@ export let updateChat = async(messageId, user1, user2, content, timestamp) => {
 
 };
 
-export let createNewChat = async (messageId, senderId, receiverId, content, timestamp) => {
+export let createNewChat = async (messageId, user1, user2, content, timestamp) => {
     let newMessage = new MessageUnit({
         _messageId: messageId,
-        senderId: senderId,
-        receiverId: receiverId,
+        user1: user1,
+        user2: user2,
         content: content,
         timestamp: timestamp
     });
