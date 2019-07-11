@@ -10,8 +10,8 @@ export enum Type {
 }
 
 export enum rentType {
-    UNLIMITED = "UNLIMITED",
-    LIMITED = "LIMITED"
+    UNLIMITED = "unlimited",
+    LIMITED = "limited"
 }
 
 export enum Occupations {

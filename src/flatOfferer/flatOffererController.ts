@@ -4,6 +4,17 @@ import {APILogger} from "../utils/logger";
 import {formatOutput, formatUser} from "../utils";
 import {getUserByToken} from "../users/userController";
 import {Flat} from "../flats/flat";
+import {Type} from "../utils/selectionEnums";
+
+export let removeAllFlatOfferers = async (req: Request, res: Response) => {
+    APILogger.logger.warn(`[DELETE] [/flatOfferers]`);
+
+    let flatOfferers = await FlatOfferer.find();
+    await flatOfferers.forEach(async (flatOfferer) => await flatOfferer.remove());
+
+    return res.status(204).send();
+};
+
 
 //TODO add try catch to every await
 export let getFlatOfferers = async (
@@ -48,8 +59,10 @@ export let addFlatOfferer = async (req: Request, res: Response, next: NextFuncti
     const flatOfferer = new FlatOfferer();
     flatOfferer.user = user;
     flatOfferer.flat = flat;
+    user.type = Type.OFFERER;
 
     try {
+        await user.save();
         await flat.save();
         await flatOfferer.save();
         console.log(`Offerer successfully saved for user with email: ${flatOfferer.user.email}`);
