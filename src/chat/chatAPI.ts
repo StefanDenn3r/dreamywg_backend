@@ -6,5 +6,6 @@ export class ChatRoute {
         console.log("chat route called")
         app.route('/chat').get(chatController.retrieveChatList);
         app.route('/chatunit').get(chatController.retrieveChatUnit);
+        app.route('/chatunit').delete(chatController.deleteChat);
     }
 }
