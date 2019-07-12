@@ -1,4 +1,4 @@
-import {IFlatModel} from "../flats/flat";
+import {Flat, IFlatModel} from "../flats/flat";
 import {FlatshareExperience, rentType} from "../utils/selectionEnums";
 import {IFlatSeekerModel} from "./flatSeeker";
 
@@ -23,7 +23,7 @@ export const convertToSearchResult = (hardCriteriaFilteredFlats, matchedScores) 
 
 const NonUndefined = (property, comparision) => !!property ? comparision : true
 
-const NonEmpty = (property, comparision) => !!property && property.length >0 ? comparision : true
+const NonEmpty = (property, comparision) => !!property && property.length > 0 ? comparision : true
 
 const inBetween = (range, value) => (!!range.from && !!range.to) ? range.from <= value && value <= range.to : true;
 
@@ -91,6 +91,20 @@ declare global {
     }
 }
 
+export const matchOnDb = async (flatSeeker: IFlatSeekerModel) => {
+    const personalInformation = flatSeeker.personalInformation;
+    const preferences = flatSeeker.preferences;
+    const allFlats = await Flat.find();
+    const flats = await Flat.find({
+        region: {"$in": preferences.flat.regions},
+        flatshareType: preferences.flat.flatshareType,
+
+    });
+
+    return flats
+}
+
+
 export let match = (flatSeeker: IFlatSeekerModel, flats: Array<IFlatModel>) => {
     const personalInformation = flatSeeker.personalInformation;
     const preferences = flatSeeker.preferences;
@@ -98,7 +112,7 @@ export let match = (flatSeeker: IFlatSeekerModel, flats: Array<IFlatModel>) => {
     const hardCriteriaFilteredFlats = flats
     // Flatseeker POV
         .filter(flat => NonEmpty(preferences.flat.regions, preferences.flat.regions.contains(flat.region)))
-        .filter(flat => NonUndefined(preferences.flat.flatshareType,preferences.flat.flatshareType === flat.flatshareType))
+        .filter(flat => NonUndefined(preferences.flat.flatshareType, preferences.flat.flatshareType === flat.flatshareType))
         .filter(flat => inBetween(preferences.flat.room.size, flat.rooms[0].roomSize))
         .filter(flat => inBetween(preferences.flat.room.rent, flat.rooms[0].rent))
         .filter(flat => NonUndefined(preferences.flat.room.rentType, preferences.flat.room.rentType === flat.rooms[0].rentType))
@@ -116,14 +130,14 @@ export let match = (flatSeeker: IFlatSeekerModel, flats: Array<IFlatModel>) => {
         .filter(flat => preferences.flat.room.furnished === flat.rooms[0].furnished)
         .filter(flat => inBetween(preferences.flatmates.amount, flat.flatmates.length))
         .filter(flat => flat.flatmates.every(flatmate => inBetween(preferences.flatmates.age, flatmate.age)))
-    // // Both POV
+        // // Both POV
         .filter(flat => NonUndefined(preferences.genderRestriction, preferences.genderRestriction === flat.genderRestriction))
         .filter(flat => NonUndefined(preferences.cleanliness, preferences.cleanliness === flat.flatmatePreferences.cleanliness))
         .filter(flat => NonUndefined(preferences.cleaningSchedule, preferences.cleaningSchedule === flat.flatmatePreferences.cleaningSchedule))
         .filter(flat => NonUndefined(preferences.smokers, preferences.smokers === flat.flatmatePreferences.smokersAllowed))
         .filter(flat => NonUndefined(preferences.pets, preferences.pets === flat.flatmatePreferences.petsAllowed))
-    // // FlatOfferer POV
-        .filter(flat => NonUndefined(flat.flatmatePreferences.gender, flat.flatmatePreferences.gender  === flatSeeker.user.gender))
+        // // FlatOfferer POV
+        .filter(flat => NonUndefined(flat.flatmatePreferences.gender, flat.flatmatePreferences.gender === flatSeeker.user.gender))
         .filter(flat => NonEmpty(flat.flatmatePreferences.occupations, flat.flatmatePreferences.occupations.contains(personalInformation.occupation)))
         .filter(flat => inBetween(flat.flatmatePreferences.age, personalInformation.age))
         .filter(flat => flatshareExperienceComparison(flat.flatmatePreferences.flatshareExperience, personalInformation.flatshareExperience)) // todo

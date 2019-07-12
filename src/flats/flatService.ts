@@ -7,25 +7,25 @@ const regions = [
     "Ludwigsvorstadt-Isarvorstadt",
     "Maxvorstadt",
     "Schwabing-West",
-    "Au-Haidhausen",
-    "Sendling",
-    "Sendling-Westpark",
-    "Schwanthalerhöhe",
-    "Neuhausen-Nymphenburg",
-    "Moosach",
-    "Milbertshofen-Am Hart",
-    "Schwabing-Freimann",
-    "Bogenhausen",
-    "Berg am Laim",
-    "Trudering-Riem",
-    "Ramersdorf-Perlach",
-    "Obergiesing-Fasangarten",
-    "Untergiesing-Harlaching",
-    "Hadern",
-    "Pasing-Obermenzing",
-    "Aubing-Lochhausen-Langwied",
-    "Allach-Untermenzing",
-    "Feldmoching-Hasenbergl"
+    // "Au-Haidhausen",
+    // "Sendling",
+    // "Sendling-Westpark",
+    // "Schwanthalerhöhe",
+    // "Neuhausen-Nymphenburg",
+    // "Moosach",
+    // "Milbertshofen-Am Hart",
+    // "Schwabing-Freimann",
+    // "Bogenhausen",
+    // "Berg am Laim",
+    // "Trudering-Riem",
+    // "Ramersdorf-Perlach",
+    // "Obergiesing-Fasangarten",
+    // "Untergiesing-Harlaching",
+    // "Hadern",
+    // "Pasing-Obermenzing",
+    // "Aubing-Lochhausen-Langwied",
+    // "Allach-Untermenzing",
+    // "Feldmoching-Hasenbergl"
 ];
 const stations = [
     "Giesing, München",
@@ -1342,8 +1342,8 @@ const stations = [
     "München Hbf, München",
 ];
 const stores = ["Edeka", "Lidl", "Aldi", "dm", "Norma", "Netto", "Rewe", "Rossmann"];
-const rentType = ['limited', 'unlimited', 'unlimited'];
-const flatshareType = ['students only', 'workers only', 'Student association', 'mixed', 'mixed', 'mixed', 'mixed'];
+const rentType = ['limited', 'unlimited'];
+const flatshareType = ['students only', 'workers only', 'Student association', 'mixed'];
 const genderRestriction = ['Women only', 'Men only'];
 const gender = ['Female', 'Male'];
 const cleanliness = [
@@ -1414,7 +1414,7 @@ const generateFlatmate = (index) => {
         result.push({
             firstName: `firstName_${index}_${i}`,
             lastName: `LastName_${index}_${i}`,
-            age: 18 + ((index + i) % 10),
+            age: 18 + ((index + i) %10),
             description: `flatmateDescription_${index}_${i}`,
             languages: generateRandomListOfType(languages, index),
             practiceOfAbstaining: generateRandomListOfType(index, practiceOfAbstaining),
@@ -1435,7 +1435,7 @@ const generateFlat = (index) => {
         region: getValueForSelection(2, regions), // todo: change
         street: `${index}_random_street_${index}`,
         houseNr: index,
-        flatSize: index % 150,
+        flatSize: index%150,
         stations: generateRandomListOfType(index, stations),
         stores: generateRandomListOfType(index, stores),
         flatshareType: getValueForSelection(index, flatshareType),
@@ -1456,7 +1456,7 @@ const generateFlat = (index) => {
         flatmates: generateFlatmate(index),
         rooms: [{
             roomSize: index % 40,
-            rent: (index * 10) % 1400,
+            rent: (index*10) % 1400,
             rentType: getValueForSelection(index, rentType),
             dateAvailableRange: generateRandomDateRange(index),
             dateAvailable: generateRandomDate(index),

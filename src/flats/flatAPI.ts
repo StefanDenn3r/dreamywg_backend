@@ -7,7 +7,7 @@ export class FlatRoute {
         app.route('/flats').post(flatController.addFlat);
         app.route('/flats/:id').get(flatController.getFlat);
         app.route('/flats/:id/residents').get(flatController.getFlatResidents);
-        app.route("/flats/:id").delete(flatController.removeFlat);
-        app.route("/flats").delete(flatController.removeAllFlats)
+        app.route("/flats/:id").delete(flatController.deleteFlat);
+        app.route("/flats").delete(flatController.deleteAllFlats)
     }
 }

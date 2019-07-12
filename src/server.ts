@@ -68,7 +68,7 @@ class Server {
     }
 
     private applyRoutes(): void {
-        this.app.use(function (req, res, next) {
+        this.app.use((req, res, next) => {
             res.header("Access-Control-Allow-Origin", "*");
             res.header(
                 "Access-Control-Allow-Headers",
