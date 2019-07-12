@@ -7,6 +7,6 @@ export class FlatSeekerRoute {
         app.route("/flatseekers/:id").get(flatSeekerController.getFlatSeeker);
         app.route("/flatseekers").get(flatSeekerController.getFlatSeekers);
         app.route("/flatseekers").post(flatSeekerController.addFlatSeeker)
-        app.route("/flatseekers").delete(flatSeekerController.removeAllFlatSeekers)
+        app.route("/flatseekers").delete(flatSeekerController.deleteAllFlatSeekers)
     }
 }

@@ -45,23 +45,21 @@ export let addFlat = async (req: Request, res: Response, next: NextFunction) => 
     }
 };
 
-export let removeFlat = async (req: Request, res: Response) => {
+export let deleteFlat = async (req: Request, res: Response) => {
     const id = req.params.id;
 
     APILogger.logger.info(`[GET] [/flats/] ${id}`);
 
-    const flat = await Flat.findById(id);
-    flat.remove()
+    await Flat.findByIdAndDelete(id);
 
     return res.status(204).send();
 };
 
 
-export let removeAllFlats = async (req: Request, res: Response) => {
+export let deleteAllFlats = async (req: Request, res: Response) => {
     APILogger.logger.warn(`[DELETE] [/flats]`);
 
-    const flats = await Flat.find();
-    await flats.forEach(async (flats) => await flats.remove());
+    await Flat.remove({});
 
     return res.status(204).send();
 };
@@ -84,7 +82,7 @@ export let getFlatResidents = async (req: Request, res: Response, next: NextFunc
 
 export const generateFlats =async (req: Request, res: Response) => {
     try {
-        await createMockFlats(100000);
+        await createMockFlats(100);
         res.status(200).send()
     } catch (e) {
         return res.status(404).send(e);

@@ -6,7 +6,7 @@ import {formatOutput, formatUser} from "../utils";
 import {APILogger} from "../utils/logger";
 import {Type} from "../utils/selectionEnums";
 import {FlatSeeker} from "./flatSeeker";
-import {match} from "./flatSeekerService";
+import {match, matchOnDb} from "./flatSeekerService";
 
 export let searchFlats = async (req: Request, res: Response) => {
     try {
@@ -18,6 +18,8 @@ export let searchFlats = async (req: Request, res: Response) => {
         const elementsPerPage = body.elementsPerPage;
 
         flatSeeker = merge(flatSeeker, body);
+
+        //const result1  = await matchOnDb(flatSeeker)
 
         const flats = await Flat.find();
         const result = match(flatSeeker, flats);
@@ -34,11 +36,10 @@ export let searchFlats = async (req: Request, res: Response) => {
 };
 
 
-export let removeAllFlatSeekers = async (req: Request, res: Response) => {
+export let deleteAllFlatSeekers = async (req: Request, res: Response) => {
     APILogger.logger.warn(`[DELETE] [/flatSeekers]`);
 
-    const flatSeekers = await FlatSeeker.find();
-    await flatSeekers.forEach(async (flatSeekers) => await flatSeekers.remove());
+    await FlatSeeker.remove({});
 
     return res.status(204).send();
 };

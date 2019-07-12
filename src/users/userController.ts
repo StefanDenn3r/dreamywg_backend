@@ -79,25 +79,20 @@ export let updateUser = async (req: Request, res: Response, next: NextFunction) 
     return user.save(() => res.status(204).send())
 };
 
-export let removeUser = async (req: Request, res: Response, next: NextFunction) => {
+export let deleteUser = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
 
     APILogger.logger.warn(`[DELETE] [/users] ${id}`);
 
-    let user = await User.findById(id);
-    if (!user) {
-        APILogger.logger.info(`[DELETE] [/users/:{id}] user with id ${id} not found`);
-        return res.status(404).send()
-    }
+    await User.findByIdAndDelete(id);
 
-    return user.remove(() => res.status(204).send())
+    return res.status(204).send()
 };
 
-export let removeAllUsers = async (req: Request, res: Response, next: NextFunction) => {
+export let deleteAllUsers = async (req: Request, res: Response, next: NextFunction) => {
     APILogger.logger.warn(`[DELETE] [/users]`);
 
-    let users = await User.find();
-    await users.forEach(async (user) => await user.remove());
+    await User.remove({})
 
     return res.status(204).send();
 };
