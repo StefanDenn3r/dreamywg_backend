@@ -66,10 +66,9 @@ export let createTimeslot = async (req: Request, res: Response, next: NextFuncti
 
 export let getPastTimeslots = async (req: Request, res: Response, next: NextFunction) => {
 
-    const schedules = await Schedule.find({ "timeslots": 
-                        { $elemMatch: 
-                            { "status": ["ACCEPTED", "REJECTED", "NO_SHOW"] }
-                        } 
+    var recentDate = new Date();
+    const schedules = await Schedule.find({
+                        "timeslots.time": {$lt: recentDate}
                     }).select("timeslots")
 
     // TODO join with user
