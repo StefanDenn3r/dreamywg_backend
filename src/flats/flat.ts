@@ -4,7 +4,7 @@ import {
     flatshareType,
     Gender,
     genderRestrictions,
-    Occupations,
+    occupation,
     rentType
 } from "../utils/selectionEnums";
 
@@ -43,7 +43,7 @@ export interface IFlat {
         description: String,
         languages: String[],
         practiceOfAbstaining: String[],
-        occupation: Occupations,
+        occupation: occupation,
         field: String,
         hobbies: String[],
         socialMedia: String
@@ -63,7 +63,7 @@ export interface IFlat {
             from: Number,
             to: Number
         }
-        occupations: Occupations,
+        occupations: occupation[],
         flatshareExperience: FlatshareExperience,
         practiceOfAbstaining: String[],
         cleanliness: String,
@@ -110,7 +110,7 @@ export const FlatSchema = new Schema({
         description: String,
         languages: [String],
         practiceOfAbstaining: [String],
-        occupation: {type: String, enum: this.Occupations},
+        occupation: {type: String, enum: this.occupation},
         field: String,
         hobbies: [String],
         socialMedia: String
@@ -130,7 +130,7 @@ export const FlatSchema = new Schema({
             from: Number,
             to: Number
         },
-        occupations: {type: String, enum: this.Occupations},
+        occupations: [{type: String, enum: this.occupation}],
         flatshareExperience: {type: String, enum: this.FlatshareExperience},
         practiceOfAbstaining: [String],
         cleanliness: String,

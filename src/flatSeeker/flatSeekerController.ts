@@ -1,37 +1,52 @@
 import {NextFunction, Request, Response} from "express";
-import {FlatSeeker} from "./flatSeeker";
-import {APILogger} from "../utils/logger";
-import {formatOutput, formatUser} from "../utils";
-import {getUserByToken} from "../users/userController";
+import {merge} from "lodash";
 import {Flat} from "../flats/flat";
-import {match} from "./flatSeekerService";
+import {getUserByToken} from "../users/userController";
+import {formatOutput, formatUser} from "../utils";
+import {APILogger} from "../utils/logger";
 import {Type} from "../utils/selectionEnums";
+import {FlatSeeker} from "./flatSeeker";
+import {match} from "./flatSeekerService";
 
 export let searchFlats = async (req: Request, res: Response) => {
+    try {
+        const user = await getUserByToken(req.header('Authorization'));
+        let flatSeeker = await FlatSeeker.findOne({user: user}).populate('user');
 
-    const filters = req.body
+        const body = req.body;
+        const page = body.page;
+        const elementsPerPage = body.elementsPerPage;
 
-    const user = await getUserByToken(req.header('Authorization'));
-    const flatSeeker = await FlatSeeker.findOne({user: user});
-    const flats = await Flat.find();
-    // todo: modify flatSeeker with respect to search request
-    res.status(200).send(match(flatSeeker, flats))
+        flatSeeker = merge(flatSeeker, body);
+
+        const flats = await Flat.find();
+        const result = match(flatSeeker, flats);
+        const resultLength = result.length;
+        if (resultLength > 0) {
+            result['totalResults'] = resultLength;
+            const slicedResult = result.slice(page * elementsPerPage, (page + 1) * elementsPerPage);
+            return res.status(200).send(slicedResult)
+        }
+        return res.status(200).send([])
+    } catch (e) {
+        return res.status(400).send()
+    }
 };
 
 
 export let removeAllFlatSeekers = async (req: Request, res: Response) => {
     APILogger.logger.warn(`[DELETE] [/flatSeekers]`);
 
-    let flatSeekers = await FlatSeeker.find();
+    const flatSeekers = await FlatSeeker.find();
     await flatSeekers.forEach(async (flatSeekers) => await flatSeekers.remove());
 
     return res.status(204).send();
 };
 
 
-//TODO add try catch to every await
+// TODO add try catch to every await
 export let getFlatSeekers = async (req: Request, res: Response) => {
-    let flatOfferer = await FlatSeeker.find();
+    const flatOfferer = await FlatSeeker.find();
     if (!flatOfferer) {
         APILogger.logger.info(`[GET] [/flatseekers] something went wrong`);
         return res.status(404).send();
@@ -45,7 +60,7 @@ export let getFlatSeeker = async (req: Request, res: Response, next: NextFunctio
 
     APILogger.logger.info(`[GET] [/flatseekers] ${id}`);
 
-    let flatofferer = await FlatSeeker.findById(id);
+    const flatofferer = await FlatSeeker.findById(id);
     if (!flatofferer) {
         APILogger.logger.info(
             `[GET] [/flatseekers/:{id}] flatseekers with id ${id} not found`
@@ -56,7 +71,7 @@ export let getFlatSeeker = async (req: Request, res: Response, next: NextFunctio
 };
 
 export let loadSearchProperties = async (req: Request, res: Response, next: NextFunction) => {
-    let token = req.header('Authorization');
+    const token = req.header('Authorization');
     const user = await getUserByToken(token);
     const flatSeeker = await FlatSeeker.findOne({user: user});
 
@@ -101,7 +116,7 @@ export let addFlatSeeker = async (req: Request, res: Response, next: NextFunctio
         return res.status(404).send();
     }
 
-    newSeeker.user = user;
+    newSeeker.user = user._id;
     user.type = Type.SEEKER;
     try {
         await user.save();

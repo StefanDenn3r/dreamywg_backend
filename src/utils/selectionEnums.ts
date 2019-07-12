@@ -14,7 +14,7 @@ export enum rentType {
     LIMITED = "limited"
 }
 
-export enum Occupations {
+export enum occupation {
     STUDENT = 'Student',
     WORKING = 'Working',
     ON_VACATION = 'On Vacation',
