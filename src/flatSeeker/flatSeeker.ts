@@ -1,4 +1,4 @@
-import {FlatshareExperience, flatshareType, genderRestrictions, Occupations, rentType} from "../utils/selectionEnums";
+import {FlatshareExperience, flatshareType, genderRestrictions, occupation, rentType} from "../utils/selectionEnums";
 import {Document, model, Model, models, Schema} from "mongoose";
 import {IUser} from "../users/user";
 
@@ -8,7 +8,7 @@ import {IUser} from "../users/user";
 interface IFlatSeeker {
     user: IUser,
     personalInformation: {
-        occupation: Occupations,
+        occupation: occupation,
         field: String,
         flatshareExperience: FlatshareExperience,
         languages: String[],
@@ -82,7 +82,7 @@ export interface IFlatSeekerModel extends IFlatSeeker, Document {
 export const FlatSeekerSchema = new Schema({
     user: {type: Schema.Types.ObjectId, ref: 'User'},
     personalInformation: {
-        occupation: {type: String, enum: this.Occupations},
+        occupation: {type: String, enum: this.occupation},
         field: String,
         flatshareExperience: {type: String, enum: this.FlatshareExperience},
         languages: [String],
