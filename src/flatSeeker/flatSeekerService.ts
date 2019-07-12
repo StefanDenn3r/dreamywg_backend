@@ -48,7 +48,7 @@ const flatshareExperienceComparison = (requiredExperience: FlatshareExperience, 
 }
 
 const matchBooleanRestrictions = (seekerProperty, offererPreference) => {
-    return !(!offererPreference && seekerProperty) // todo: verify this especially
+    return !(!offererPreference && seekerProperty)
 }
 
 /**
@@ -72,7 +72,7 @@ const calculateFlatmateScore = (flatmates, personalInformation) => {
     const hasCommonField = +flatmates.some(flatmate => flatmate.field === personalInformation.field);
     const speaksSameLangauges = +flatmates.some(flatmate => personalInformation.languages.some(language => flatmate.languages.contains(language)));
     const hasSameHobbies = +flatmates.some(flatmate => personalInformation.hobbies.some(hobby => flatmate.hobbies.contains(hobby)));
-    return (hasCommonField + speaksSameLangauges + hasSameHobbies) / 3 // todo: probably won't work
+    return (hasCommonField + speaksSameLangauges + hasSameHobbies) / 3
 }
 
 const calculateFlatshareActivityScore = (flatActivities, seekerActivties) => {
@@ -140,7 +140,7 @@ export let match = (flatSeeker: IFlatSeekerModel, flats: Array<IFlatModel>) => {
         .filter(flat => NonUndefined(flat.flatmatePreferences.gender, flat.flatmatePreferences.gender === flatSeeker.user.gender))
         .filter(flat => NonEmpty(flat.flatmatePreferences.occupations, flat.flatmatePreferences.occupations.contains(personalInformation.occupation)))
         .filter(flat => inBetween(flat.flatmatePreferences.age, personalInformation.age))
-        .filter(flat => flatshareExperienceComparison(flat.flatmatePreferences.flatshareExperience, personalInformation.flatshareExperience)) // todo
+        .filter(flat => flatshareExperienceComparison(flat.flatmatePreferences.flatshareExperience, personalInformation.flatshareExperience))
         .filter(flat => NonEmpty(personalInformation.practiceOfAbstaining, personalInformation.practiceOfAbstaining.every(practice => NonUndefined(flat.flatmatePreferences.practiceOfAbstaining, flat.flatmatePreferences.practiceOfAbstaining.contains(practice)))))
         .filter(flat => matchBooleanRestrictions(personalInformation.smoker, flat.flatmatePreferences.smokersAllowed))
         .filter(flat => matchBooleanRestrictions(personalInformation.pets, flat.flatmatePreferences.petsAllowed))
