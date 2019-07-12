@@ -20,7 +20,7 @@ export interface IUserModel extends IUser, Document {
     fullName(): string;
 }
 
-export var UserSchema: Schema = new Schema({
+export const UserSchema: Schema = new Schema({
     jwt_token: {type: String, unique: true},
     email: {type: String, unique: true},
     password: String,
