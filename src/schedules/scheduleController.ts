@@ -66,23 +66,23 @@ export let createTimeslots = async (req: Request, res: Response, next: NextFunct
     })
 
     //TODO validation
-    const timeslot = schedule.date
+    const timeslot = new Date(schedule.date)
     timeslot.setHours(startHour)
     timeslot.setMinutes(startMinute)
 
-    const endTimeslot = schedule.date
+    const endTimeslot = new Date(schedule.date)
     endTimeslot.setHours(endHour)
     endTimeslot.setMinutes(endMinute)
 
     schedule.timeslots.push({
-        time: timeslot,
+        time: new Date(timeslot),
         userId: null
     })
 
     while (timeslot < endTimeslot) {
         const minute = timeslot.getMinutes()
         const hour = timeslot.getHours()
-
+        
         if (minute + sessionTime < 60) {
             timeslot.setMinutes(minute + sessionTime)
         } else {
@@ -91,17 +91,10 @@ export let createTimeslots = async (req: Request, res: Response, next: NextFunct
         }
 
         schedule.timeslots.push({
-            time: timeslot,
+            time: new Date(timeslot),
             userId: null
         })
     }
-    
-    schedule.timeslots.push({
-        time: endTimeslot,
-        userId: null
-    })
-
-    console.log(schedule.timeslots)
 
     const savedSchedule = await schedule.save().catch(error => {
         APILogger.logger.error(`[POST] [/schedules] something went wrong when saving a new timeslot | ${error.message}`);
