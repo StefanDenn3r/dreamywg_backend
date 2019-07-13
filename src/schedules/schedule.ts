@@ -10,7 +10,7 @@ interface ISchedule {
 export interface ITimeSlot {
     time: Date;
     userId: string;
-    status: InterviewStatus;
+    status?: InterviewStatus;
 }
 
 export interface IScheduleModel extends ISchedule, Document {
