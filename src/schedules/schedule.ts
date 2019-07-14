@@ -4,6 +4,7 @@ import {Document, Model, model, Schema} from "mongoose";
 interface ISchedule {
     date: Date;
     timeslots: ITimeSlot[];
+    flatId: string;
 }
 
 // TODO (Q) how should I use this?
@@ -54,6 +55,10 @@ export var ScheduleSchema: Schema = new Schema({
     timeslots: {
         type: [TimeSlotSchema],
         default: []
+    },
+    flatId: {
+        type: Schema.Types.ObjectId,
+        ref: 'Flat'
     }
 }, {
     versionKey: false,
