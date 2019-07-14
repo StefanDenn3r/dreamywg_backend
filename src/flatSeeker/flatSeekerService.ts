@@ -36,10 +36,6 @@ const NonEmpty = (property, comparision) => {
 
 const inBetween = (range, value) => (!!range.from && !!range.to) ? range.from <= value && value <= range.to : true;
 
-const inBetweenDate = (range, value) => {
-    return range[0] <= value && value <= range[1];
-}; // check if this works with date as well
-
 const flatshareExperienceComparison = (requiredExperience: FlatshareExperience, seekerExperience: FlatshareExperience) => {
     if (requiredExperience === FlatshareExperience.NONE)
         return true;
@@ -155,7 +151,7 @@ export const matchOnDb = async (flatSeeker: IFlatSeekerModel) => {
 
         return res.sort((a, b) => b.matched - a.matched)
     } catch (e) {
-        console.log(e)
+        console.log(e);
         return null
     }
 };
