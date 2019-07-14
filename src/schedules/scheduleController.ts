@@ -39,7 +39,8 @@ export let createSchedules = async (req: Request, res: Response, next: NextFunct
         const scheduledDate = new Date(startDate)
         scheduledDate.setDate(startDate.getDate() + index)
         schedules[index] = new Schedule({
-            date: scheduledDate
+            date: scheduledDate,
+            flatId: null
         }).save()
     }
 
@@ -130,8 +131,14 @@ export let getPastTimeslots = async (req: Request, res: Response, next: NextFunc
     return res.end(JSON.stringify(timeslots));
 };
 
-export let updateTimeslot = async (req: Request, res: Response, next: NextFunction) => {
-    return {}
+export let updatePastTimeslotStatus = async (req: Request, res: Response, next: NextFunction) => {
+    const timeslotId = req.params.id
+    const newStatus = req.body.status
+    const schedules = await Schedule.update({'timeslots._id': timeslotId}, {'$set': {
+        'timeslots.$.status': newStatus
+    }})
+
+    return res.end(JSON.stringify(schedules));
 };
 
 export let deleteAllSchedule = async (req: Request, res: Response, next: NextFunction) => {
