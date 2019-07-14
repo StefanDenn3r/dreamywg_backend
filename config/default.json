@@ -3,6 +3,7 @@
   "port": 4005,
   "frontend_port": 3000,
   "host": "localhost",
+  "serverUrl": "https://a980a864.ngrok.io",
   "mongo": {
     "URI": "mongodb://localhost:27017/db",
     "config": {

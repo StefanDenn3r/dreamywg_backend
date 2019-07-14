@@ -1,17 +1,15 @@
 import axios from 'axios';
 import * as bcrypt from 'bcrypt'
+import * as config from 'config'
 import {NextFunction, Request, Response} from 'express'
 import * as halson from 'halson'
 import * as jwt from 'jsonwebtoken'
+import * as querystring from 'querystring';
 import Token, {ITokenModel} from "../tokens/token";
 import {formatOutput, formatUser} from '../utils'
 import {APILogger} from '../utils/logger'
 import {IUserModel, User} from './user'
 import {sendVerificationMail} from './userService'
-import * as config from 'config'
-import * as querystring from 'querystring';
-
-const serverUrl = `https://faceccb1.ngrok.io`;
 
 
 // TODO add try catch to every await
@@ -174,7 +172,7 @@ export let oAuthLinkedIn = async (req: Request, res: Response, next: NextFunctio
 
     if (code && state) {
         try {
-            const redirectUrl = `${serverUrl}/users/oauthLinkedin`;
+            const redirectUrl = `${config.get('serverUrl')}/users/oauthLinkedin`;
             const clientId = "78guq2rtxaouam";
             const clientSecret = "tWZPBjm8WgX9ngaH";
             const data = querystring.stringify({
@@ -200,8 +198,6 @@ export let oAuthLinkedIn = async (req: Request, res: Response, next: NextFunctio
         } catch (e) {
         }
     }
-
-    // todo: handshake linkedin, facebook, change URL, check how redirect works on after handshake
 };
 
 export let oAuthFacebook = async (req: Request, res: Response, next: NextFunction) => {
@@ -211,7 +207,7 @@ export let oAuthFacebook = async (req: Request, res: Response, next: NextFunctio
     if (code && state) {
         try {
             const clientId = `595941830904271`;
-            const redirectUrl = `${serverUrl}/users/oauthFacebook`;
+            const redirectUrl = `${config.get('serverUrl')}/users/oauthFacebook`;
             const clientSecret = "c68a35d1246498371ce21c3277753016";
             const data = {
                 grant_type: "authorization_code",
