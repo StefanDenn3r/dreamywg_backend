@@ -29,7 +29,8 @@ export var TimeSlotSchema: Schema = new Schema({
     time: {
         type: Date,
         default: Date(),
-        unique: true
+        unique: true,
+        sparse: true
     },
     userId: {
         type: Schema.Types.ObjectId,
@@ -40,6 +41,8 @@ export var TimeSlotSchema: Schema = new Schema({
         enum: this.InterviewStatus,
         default: InterviewStatus.IDLE
     }
+}, {
+    usePushEach: true
 })
 
 export var ScheduleSchema: Schema = new Schema({
@@ -52,7 +55,10 @@ export var ScheduleSchema: Schema = new Schema({
         type: [TimeSlotSchema],
         default: []
     }
-}, {versionKey: false});
+}, {
+    versionKey: false,
+    usePushEach: true
+});
 
 const Schedule: Model<IScheduleModel> = model<IScheduleModel>("Schedule", ScheduleSchema);
 export default Schedule
