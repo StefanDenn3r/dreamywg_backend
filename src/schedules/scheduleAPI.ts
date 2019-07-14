@@ -7,6 +7,7 @@ export class ScheduleRoute {
         app.route('/schedules').post(scheduleController.createSchedules);
         app.route('/schedules/:id/timeslots').post(scheduleController.createTimeslots);
         app.route('/schedules/:scheduleId/timeslots/:timeslotId').put(scheduleController.updateTimeslot);
+        app.route('/schedules').delete(scheduleController.deleteAllSchedule);
         app.route('/schedules/timeslots/past').get(scheduleController.getPastTimeslots);
     }
 }
