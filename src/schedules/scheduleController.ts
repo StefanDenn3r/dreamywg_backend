@@ -6,12 +6,11 @@ import { start } from 'repl';
 //TODO (Q) wait for flat offerer registration
 //TODO (Q) refactor logic to service class
 export let getSchedules = async (req: Request, res: Response, next: NextFunction) => {
-    let schedules = await Schedule.find().lean()
-    // .catch((e) => {
-    //     APILogger.logger.info(`[GET] [/schedules] something went wrong`);
-    //     next(e)
-    //     return null;
-    // })
+    let schedules = await Schedule.find().lean().catch((e) => {
+        APILogger.logger.info(`[GET] [/schedules] something went wrong`);
+        next(e)
+        return null;
+    })
 
     return res.end(JSON.stringify(schedules));
 };
@@ -34,21 +33,22 @@ export let createSchedules = async (req: Request, res: Response, next: NextFunct
     const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
     // TODO add validation
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
-    
-    const scheduledDate = new Date(startDate)
+
     const schedules = []
     for (let index = 0; index <= diffDays; index++) {
+        const scheduledDate = new Date(startDate)
+        scheduledDate.setDate(startDate.getDate() + index)
         schedules[index] = new Schedule({
-            date: scheduledDate.setDate(startDate.getDate() + index),
-            timeslots: []
+            date: scheduledDate
         }).save()
     }
+
     const response = await Promise.all(schedules).catch(error => {
         APILogger.logger.error(`[POST] [/schedules] something went wrong when saving a new schedule | ${error.message}`);
         next(error)
         return null
     });
-    console.log(response, 'response')
+
     return res.end(JSON.stringify(response));
 }
 
@@ -132,4 +132,9 @@ export let getPastTimeslots = async (req: Request, res: Response, next: NextFunc
 
 export let updateTimeslot = async (req: Request, res: Response, next: NextFunction) => {
     return {}
+};
+
+export let deleteAllSchedule = async (req: Request, res: Response, next: NextFunction) => {
+    await Schedule.deleteMany({})
+    return res.end(JSON.stringify("HAHAHA"));
 };
