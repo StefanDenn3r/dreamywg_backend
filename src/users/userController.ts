@@ -1,19 +1,22 @@
+import axios from 'axios';
 import * as bcrypt from 'bcrypt'
 import {NextFunction, Request, Response} from 'express'
 import * as halson from 'halson'
 import * as jwt from 'jsonwebtoken'
-import {IUserModel, User} from './user'
-import {APILogger} from '../utils/logger'
-import {formatOutput, formatUser} from '../utils'
 import Token, {ITokenModel} from "../tokens/token";
+import {formatOutput, formatUser} from '../utils'
+import {APILogger} from '../utils/logger'
+import {IUserModel, User} from './user'
 import {sendVerificationMail} from './userService'
-import * as querystring from 'query-string';
-import { request } from 'http';
-import {OAuth} from 'oauth'
+import * as config from 'config'
+import * as querystring from 'querystring';
 
-//TODO add try catch to every await
+const serverUrl = `https://faceccb1.ngrok.io`;
+
+
+// TODO add try catch to every await
 export let getUsers = async (req: Request, res: Response, next: NextFunction) => {
-    let users = await User.find();
+    const users = await User.find();
 
     if (!users) {
         APILogger.logger.info(`[GET] [/users] something went wrong`);
@@ -28,7 +31,7 @@ export let getUser = async (req: Request, res: Response, next: NextFunction) => 
 
     APILogger.logger.info(`[GET] [/users] ${id}`);
 
-    let user = await User.findById(id);
+    const user = await User.findById(id);
     if (!user) {
         APILogger.logger.info(`[GET] [/users/:{id}] user with id ${id} not found`);
         return res.status(404).send()
@@ -59,7 +62,7 @@ export let addUser = async (req: Request, res: Response, next: NextFunction) => 
 };
 
 export let getUserByToken = async (token: String) => {
-    let user: IUserModel = await User.findOne({jwt_token: token});
+    const user: IUserModel = await User.findOne({jwt_token: token});
     return user
 }
 
@@ -68,7 +71,7 @@ export let updateUser = async (req: Request, res: Response, next: NextFunction) 
     const id = token
     APILogger.logger.info(`[PATCH] [/users] ${id}`);
 
-    let user: IUserModel = await User.findOne({jwt_token: token});
+    const user: IUserModel = await User.findOne({jwt_token: token});
 
     if (!user) {
         APILogger.logger.info(`[PATCH] [/users/:{id}] user with id ${id} not found`);
@@ -88,7 +91,7 @@ export let removeUser = async (req: Request, res: Response, next: NextFunction) 
 
     APILogger.logger.warn(`[DELETE] [/users] ${id}`);
 
-    let user = await User.findById(id);
+    const user = await User.findById(id);
     if (!user) {
         APILogger.logger.info(`[DELETE] [/users/:{id}] user with id ${id} not found`);
         return res.status(404).send()
@@ -100,7 +103,7 @@ export let removeUser = async (req: Request, res: Response, next: NextFunction) 
 export let removeAllUsers = async (req: Request, res: Response, next: NextFunction) => {
     APILogger.logger.warn(`[DELETE] [/users]`);
 
-    let users = await User.find();
+    const users = await User.find();
     await users.forEach(async (user) => await user.remove());
 
     return res.status(204).send();
@@ -117,7 +120,7 @@ export let login = async (req: Request, res: Response, next: NextFunction) => {
         return res.status(404).send('User not found')
     }
 
-    if (!user.isVerified) {
+    if (!user.isVerifiedByMail) {
         return res.status(412).send('Please verify you account first.')
     }
 
@@ -133,7 +136,10 @@ export let login = async (req: Request, res: Response, next: NextFunction) => {
         } catch (err) {
             return res.status(500).send(err.message);
         }
-        return res.json({token: token})
+        return res.json({
+            user: user,
+            token: token
+        })
     } else {
         APILogger.logger.info(`[GET] [/users/login] user not authorized ${email}`);
         return res.status(401).send('Username and/or password don\'t match.')
@@ -142,14 +148,18 @@ export let login = async (req: Request, res: Response, next: NextFunction) => {
 
 export let confirmEmail = async (req: Request, res: Response, next: NextFunction) => {
     const tokenParam = req.params.token;
-    let token: ITokenModel = await Token.findOne({token: tokenParam});
-    if (!token) return res.status(400).send("token not found");
+    const token: ITokenModel = await Token.findOne({token: tokenParam});
+    if (!token) {
+        return res.status(400).send("token not found");
+    }
 
-    let user: IUserModel = await User.findById(token._userId);
-    if (!user) return res.status(400).send("invalid token");
+    const user: IUserModel = await User.findById(token._userId);
+    if (!user) {
+        return res.status(400).send("invalid token");
+    }
 
     // maybe add check if user already verified
-    user.isVerified = true;
+    user.isVerifiedByMail = true;
     try {
         await user.save()
     } catch (err) {
@@ -157,80 +167,72 @@ export let confirmEmail = async (req: Request, res: Response, next: NextFunction
     }
     return res.status(200).send("Your account has successfully been verified.");
 };
-export let registerFacebook = async(req: Request, res: Response, next: NextFunction) => {
+
+export let oAuthLinkedIn = async (req: Request, res: Response, next: NextFunction) => {
     const code = req.query.code;
     const state = req.query.state;
 
-    try {
-        handshakeFb(code, state, res);
-    } catch (err) {
-        APILogger.logger.error(`[POST] [/users] something went wrong # ${err.message}`);
-        next(err)
-    }
-    return res.status(200).send("Linkedin auth ok");
+    if (code && state) {
+        try {
+            const redirectUrl = `${serverUrl}/users/oauthLinkedin`;
+            const clientId = "78guq2rtxaouam";
+            const clientSecret = "tWZPBjm8WgX9ngaH";
+            const data = querystring.stringify({
+                grant_type: "authorization_code",
+                code: code,
+                state: state,
+                redirect_uri: redirectUrl,
+                client_id: clientId,
+                client_secret: clientSecret
+            });
+            const linkedInURL = 'https://www.linkedin.com/oauth/v2/accessToken';
+            const result = await axios.post(linkedInURL, data, {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            });
+            const user = await User.findById(state);
+            user.isVerifiedBySocialMedia = true;
+            user.accessTokenLinkedIn = result.data.access_token;
+            await user.save();
+            return res.redirect(`http://${config.get('host')}:${config.get('frontend_port')}/login`);
 
-}
-
-
-export let registerLinkedin = async(req: Request, res: Response, next: NextFunction) => {
-    console.log("register linkedin is being called")
-    const code = req.query.code;
-    const state = req.query.state;
-
-    try {
-        handshake(code, state, res);
-    } catch (err) {
-        APILogger.logger.error(`[POST] [/users] something went wrong # ${err.message}`);
-        next(err)
-    }
-    return res.status(200).send("Linkedin auth ok");
-}
-export let handshakeFb = (code: string, state: string, res: Response) => {
-
-};
-export let handshake = (code: string, state: string, res: Response) => {
-    console.log("handshake function");
-    const redirect_uri = "http://localhost:4005/socialmediaauth/linkedin";
-    const client_id = "78guq2rtxaouam";
-    const client_secret = "tWZPBjm8WgX9ngaH";
-
-    const data = querystring.stringify({
-        grant_type: "authorization_code",
-        code: code,
-        redirect_uri: redirect_uri,//should match as in Linkedin application setup
-        client_id: client_id,
-        client_secret: client_secret// the secret
-    });
-
-      const req = request(
-      {
-        host: 'www.linkedin.com',
-        path: '/oauth/v2/accessToken',
-        protocol: 'https:',
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Content-Length': Buffer.byteLength(data)
+        } catch (e) {
         }
-      },
-      response => {
-        var data = '';
-        response.setEncoding('utf8');
-        response.on('data', (chunk) => {
-            data += chunk;
-        });
-        response.on('error', (e) => {
-            console.log("problem with request: " + e.message);
-            res.status(500).send(e.message);
-        });
-        response.on('end', () => {
-          //const result = Buffer.concat(chunks).toString();
-          console.log(JSON.parse(data));
-          //return result;
-        });
-      }
-    );
-    req.write(data);
-    req.end();
-    res.status(200).send("Linkedin auth ok");
+    }
+
+    // todo: handshake linkedin, facebook, change URL, check how redirect works on after handshake
+};
+
+export let oAuthFacebook = async (req: Request, res: Response, next: NextFunction) => {
+    const code = req.query.code;
+    const state = req.query.state;
+
+    if (code && state) {
+        try {
+            const clientId = `595941830904271`;
+            const redirectUrl = `${serverUrl}/users/oauthFacebook`;
+            const clientSecret = "c68a35d1246498371ce21c3277753016";
+            const data = {
+                grant_type: "authorization_code",
+                code: code,
+                state: state,
+                redirect_uri: redirectUrl,
+                client_id: clientId,
+                client_secret: clientSecret
+            };
+            const facebookUrl = 'https://graph.facebook.com/v3.3/oauth/access_token';
+            const result = await axios.post(facebookUrl, data);
+
+            const user = await User.findById(state);
+            user.isVerifiedBySocialMedia = true;
+            user.accessTokenFacebook = result.data.access_token;
+            await user.save();
+            return res.redirect(`http://${config.get('host')}:${config.get('frontend_port')}/login`);
+
+        } catch (e) {
+
+        }
+    }
+    return res.status(400).send();
 };
