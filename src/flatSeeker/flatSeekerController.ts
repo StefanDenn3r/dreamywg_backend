@@ -1,12 +1,11 @@
 import {NextFunction, Request, Response} from "express";
-import {merge} from "lodash";
-import {Flat} from "../flats/flat";
+import {mergeWith, isArray} from "lodash";
 import {getUserByToken} from "../users/userController";
 import {formatOutput, formatUser} from "../utils";
 import {APILogger} from "../utils/logger";
 import {Type} from "../utils/selectionEnums";
 import {FlatSeeker} from "./flatSeeker";
-import {match, matchOnDb} from "./flatSeekerService";
+import {matchOnDb} from "./flatSeekerService";
 
 export let searchFlats = async (req: Request, res: Response) => {
     try {
@@ -17,20 +16,33 @@ export let searchFlats = async (req: Request, res: Response) => {
         const page = body.page;
         const elementsPerPage = body.elementsPerPage;
 
-        flatSeeker = merge(flatSeeker, body);
+        flatSeeker = mergeWith(flatSeeker, body, (objValue, srcValue) => {
+            if (isArray(objValue)) {
+                return srcValue;
+            }
+        });
 
-        //const result1  = await matchOnDb(flatSeeker)
+        if (body.preferences.flat.room.dateAvailable)
+            flatSeeker.preferences.flat.room.dateAvailableRange = [];
+        else
+            flatSeeker.preferences.flat.room.dateAvailable = undefined;
 
-        const flats = await Flat.find();
-        const result = match(flatSeeker, flats);
+        const result = await matchOnDb(flatSeeker)
+
         const resultLength = result.length;
         if (resultLength > 0) {
-            result['totalResults'] = resultLength;
-            const slicedResult = result.slice(page * elementsPerPage, (page + 1) * elementsPerPage);
-            return res.status(200).send(slicedResult)
+            const slicedResult = result.slice((page - 1) * elementsPerPage, page * elementsPerPage);
+            return res.send({
+                data: slicedResult,
+                totalResults: resultLength
+            })
         }
-        return res.status(200).send([])
+        return res.status(200).send({
+            data: [],
+            totalResults: 0
+        })
     } catch (e) {
+        console.log(e)
         return res.status(400).send()
     }
 };

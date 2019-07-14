@@ -82,7 +82,7 @@ export let getFlatResidents = async (req: Request, res: Response, next: NextFunc
 
 export const generateFlats =async (req: Request, res: Response) => {
     try {
-        await createMockFlats(100);
+        await createMockFlats(20000);
         res.status(200).send()
     } catch (e) {
         return res.status(404).send(e);

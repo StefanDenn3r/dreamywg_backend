@@ -37,5 +37,6 @@ export enum flatshareType {
 
 export enum genderRestrictions {
     WOMEN_ONLY = 'Women only',
-    MEN_ONLY = 'Men only'
+    MEN_ONLY = 'Men only',
+    None = 'None'
 }
