@@ -1,16 +1,17 @@
 import {NextFunction, Request, Response} from 'express'
-import Schedule, { ITimeSlot, IScheduleModel } from './schedule';
+import Schedule, { IScheduleModel } from './schedule';
 import { APILogger } from '../utils/logger';
 import { start } from 'repl';
 
 //TODO (Q) wait for flat offerer registration
 //TODO (Q) refactor logic to service class
 export let getSchedules = async (req: Request, res: Response, next: NextFunction) => {
-    let schedules = await Schedule.find().lean().catch((e) => {
-        APILogger.logger.info(`[GET] [/schedules] something went wrong`);
-        next(e)
-        return null;
-    })
+    let schedules = await Schedule.find().lean()
+    // .catch((e) => {
+    //     APILogger.logger.info(`[GET] [/schedules] something went wrong`);
+    //     next(e)
+    //     return null;
+    // })
 
     return res.end(JSON.stringify(schedules));
 };
