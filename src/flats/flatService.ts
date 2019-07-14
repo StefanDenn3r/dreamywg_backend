@@ -1,6 +1,7 @@
 'use strict';
 
 import {Flat} from "./flat";
+import {genderRestrictions} from "../utils/selectionEnums";
 
 const regions = [
     "Altstadt-Lehel",
@@ -1344,7 +1345,6 @@ const stations = [
 const stores = ["Edeka", "Lidl", "Aldi", "dm", "Norma", "Netto", "Rewe", "Rossmann"];
 const rentType = ['limited', 'unlimited'];
 const flatshareType = ['students only', 'workers only', 'Student association', 'mixed'];
-const genderRestriction = ['Women only', 'Men only'];
 const gender = ['Female', 'Male'];
 const cleanliness = [
     "Don't care",
@@ -1377,10 +1377,10 @@ const getRandomInt = (max) => {
 };
 
 const getRandomAgeSpan = (index) => {
-    index %= 40;
+    const from = 18 + (index % 10)
     return {
-        from: index,
-        to: index + getRandomInt(10)
+        from: from,
+        to: from + 5
     }
 };
 
@@ -1389,15 +1389,16 @@ const getRandomBoolean = () => {
 };
 
 const generateRandomDate = (index) => {
-    return new Date(2019, index % 12, index % 28)
+    return new Date(2019, index % 12, (index + 1) % 28)
 };
 
 const generateRandomDateRange = (index) => {
-    return [new Date(2019, Math.max(index, 9) % 12, index % 28), new Date(2019, (index + 2) % 12, index % 28)]
+    const start = index % 9;
+    return [new Date(2019, start, 1), new Date(2019, (start + 2), 27)];
 };
 
 const getValueForSelection = (index, list) => {
-    return list[index % list.length]
+    return list[(index + getRandomInt(5)) % list.length]
 };
 
 const generateRandomListOfType = (index, list) => {
@@ -1414,9 +1415,9 @@ const generateFlatmate = (index) => {
         result.push({
             firstName: `firstName_${index}_${i}`,
             lastName: `LastName_${index}_${i}`,
-            age: 18 + ((index + i) %10),
+            age: 18 + ((index + i) % 10),
             description: `flatmateDescription_${index}_${i}`,
-            languages: generateRandomListOfType(languages, index),
+            languages: generateRandomListOfType(index, languages),
             practiceOfAbstaining: generateRandomListOfType(index, practiceOfAbstaining),
             occupation: getValueForSelection(index, occupation),
             field: getValueForSelection(index, field),
@@ -1432,14 +1433,14 @@ const generateFlat = (index) => {
         title: `title_${index}`,
         shortDescription: `We are an awesome WG! ${index}`,
         longDescription: `We are an awesome WG! ${index} - and you should be awesome as well`,
-        region: getValueForSelection(2, regions), // todo: change
-        street: `${index}_random_street_${index}`,
+        region: getValueForSelection(index, regions),
+        street: `Mainstreet`,
         houseNr: index,
-        flatSize: index%150,
+        flatSize: (index % 150) + 10,
         stations: generateRandomListOfType(index, stations),
         stores: generateRandomListOfType(index, stores),
-        flatshareType: getValueForSelection(index, flatshareType),
-        genderRestriction: getValueForSelection(index, genderRestriction),
+        flatshareType: getValueForSelection(3, flatshareType), // todo: change
+        genderRestriction: genderRestrictions.None, // getValueForSelection(index, genderRestriction),
         flatEquipment: {
             parkingLot: getRandomBoolean(),
             livingroom: getRandomBoolean(),
@@ -1456,10 +1457,10 @@ const generateFlat = (index) => {
         flatmates: generateFlatmate(index),
         rooms: [{
             roomSize: index % 40,
-            rent: (index*10) % 1400,
+            rent: (index * 10) % 1400,
             rentType: getValueForSelection(index, rentType),
-            dateAvailableRange: generateRandomDateRange(index),
-            dateAvailable: generateRandomDate(index),
+            dateAvailableRange: !!(index % rentType.length) ? [] : generateRandomDateRange(index),
+            dateAvailable: !!(index % rentType.length) ? generateRandomDate(index) : undefined,
             furnished: getRandomBoolean(),
             images: []
         }],
@@ -1469,12 +1470,12 @@ const generateFlat = (index) => {
             occupations: generateRandomListOfType(index, occupation),
             flatshareExperience: getValueForSelection(index, flatshareExperience),
             practiceOfAbstaining: generateRandomListOfType(index, practiceOfAbstaining),
-            cleanliness: getValueForSelection(index, cleanliness),
-            cleaningSchedule: getValueForSelection(index, cleaningSchedule),
+            cleanliness: getValueForSelection(0, cleanliness),
+            cleaningSchedule: getValueForSelection(0, cleaningSchedule),
             activities: generateRandomListOfType(index, activities),
-            smokersAllowed: getRandomBoolean(),
-            petsAllowed: getRandomBoolean(),
-            weekendAbsent: getRandomBoolean()
+            smokersAllowed: false, // getRandomBoolean(),
+            petsAllowed: false, // getRandomBoolean(),
+            weekendAbsent: false, // getRandomBoolean()
         }
     }
 };
