@@ -1,42 +1,41 @@
+import {ObjectId} from "bson";
 import {NextFunction, Request, Response} from "express";
-import {User} from "../users/user";
+import * as mongoose from "mongoose";
+import {Schema} from "mongoose";
+import {getUserByToken} from "../users/userController";
 import {formatOutput} from "../utils";
 import {APILogger} from "../utils/logger";
 import MessageUnit, {MessageUnitModel} from "./messageUnit";
-import { ObjectId } from "bson";
+import {IUserModel, User} from '../users/user'
+
 
 export let retrieveChatList = async (req:Request, res: Response, next: NextFunction) => {
     console.log("calling retrieve chat list backend")
-    const userId = req.query.userId;
-    console.log("userid", userId);
-    let messageList = await MessageUnit.aggregate([{$match: { $or: [{user1: userId}, {user2: userId}]}},{ $sort : { "messages.timestamp": 1} }, {$project: {_messageId:1, user1:1, user2:1, messages: {$slice:["$messages", -1]}}}], (err, data) => {
+    let token = req.header('Authorization');
+    const user = await getUserByToken(token);
+    let messageList = await MessageUnit.aggregate([{$match: { $or: [{user1: user._id.toString()}, {user2: user._id.toString()}]}},{ $sort : { "messages.timestamp": 1} }, {$project: {_messageId:1, user1:1, user2:1, messages: {$slice:["$messages", -1]}}}], (err, data) => {
+        if (data) {
+            //res.status(400).send(err)
+            console.log(JSON.stringify(data))
+            return formatOutput(res, data, 200, "chatlist");
+        } else {
+            return res.status(400).send(err)
+        }
+    });
+};
+
+export let retrieveChatUnit = async (req:Request, res: Response, next: NextFunction) => {
+    const messageid = req.query._id;
+    let messageUnit = await MessageUnit.aggregate([{$match:{_id: new ObjectId(messageid)}}, { $sort : { "messages.timestamp": 1} }, {$project: {_messageId:1, user1:1, user2:1, messages: 1}}], (err, data) => {
         if (data) {
             //res.status(400).send(err)
             console.log(data)
-            return formatOutput(res, data, 201, 'chatlist')
+            return formatOutput(res, data, 200, "chatunit");
         } else {
             console.log("data not found");
             return res.status(400).send(err)
         }
     });
-    //return formatOutput(res, messageList, 201, 'chatlist')
-
-};
-
-export let retrieveChatUnit = async (req:Request, res: Response, next: NextFunction) => {
-    const user1 = req.params.user1;
-    const user2 = req.params.user2;
-    let messageUnit = await MessageUnit.aggregate([{$match:{ $or: [{$and:  [{user1: user1}, {user2: user2}]}, {$and:  [{user1: user2}, {user2: user1}]}]}}, { $sort : { "messages.timestamp": 1} }, {$project: {_messageId:1, user1:1, user2:1, messages: 1}}], (err, data) => {
-        if (messageUnit) {
-            //res.status(400).send(err)
-            console.log(messageUnit)
-        } else {
-            //do sort based on timestamp and show to frontend the most recent message text
-            //
-            console.log("data not found");
-        }
-    });
-    return formatOutput(res, messageUnit, 201, 'chatunit')
 };
 
 export let storeChattoDB = async (user1: string, user2: string, content: string, timestamp: Date) => {
@@ -44,20 +43,15 @@ export let storeChattoDB = async (user1: string, user2: string, content: string,
 
     let chatUnit = await MessageUnit.findOne({ $or: [{$and:  [{user1: user1}, {user2: user2}]}, {$and:  [{user1: user2}, {user2: user1}]}]});
     //create new random message id
-    console.log(chatUnit)
     if (!chatUnit) {
         //create random message id
-        console.log("create new chat");
         createNewChat(user1, user2, content, timestamp);
     }else{
-        console.log("update chat1");
-        let messageId = chatUnit._id;
-        console.log("messageid", messageId)
-        updateChat(messageId, user1, user2, content, timestamp);
+        updateChat(chatUnit._id, user1, user2, content, timestamp);
     }
 };
 
-export let updateChat = async(messageId, user1, user2, content, timestamp) => {
+export let updateChat = async(messageId, content, timestamp) => {
     const id = messageId;
 
     let message: MessageUnitModel = await MessageUnit.findById(id);
@@ -81,10 +75,8 @@ export let createNewChat = async (user1, user2, content, timestamp) => {
 
     try {
         await newMessage.save().catch(console.error);
-
     } catch (err) {
         APILogger.logger.error(`[POST] [/users] something went wrong when saving a new message # ${err.message}`);
-        //next(err)
     }
 };
 
@@ -102,3 +94,20 @@ export let deleteChat = async (req:Request, res: Response, next: NextFunction) =
     return messageunit.remove(() => res.status(204).send())
 
 };
+
+export let initChatwithAllUsers = async (req:Request, res:Response, next: NextFunction) => {
+    let token = req.header('Authorization');
+    const currentuser = await getUserByToken(token);
+    let users = await User.find();
+    await users.forEach(function(user){
+        if(user._id !== currentuser._id){
+            console.log("creating new chat for each user");
+            createNewChat(currentuser._id, user._id, "Hey", Date.now()); //create new chat except for self
+        }
+    });
+    return;
+};
+
+export let removeAllChat = async (req:Request, res:Response, next: NextFunction) => {
+    let chats = await MessageUnit.remove({});
+}
