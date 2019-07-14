@@ -7,5 +7,7 @@ export class ChatRoute {
         app.route('/chat').get(chatController.retrieveChatList);
         app.route('/chatunit').get(chatController.retrieveChatUnit);
         app.route('/chatunit').delete(chatController.deleteChat);
+        app.route('/initchat').post(chatController.initChatwithAllUsers);
+        app.route('/chat').delete(chatController.removeAllChat);
     }
 }
