@@ -1,26 +1,31 @@
-import { createServer, Server } from 'http';
+import {createServer, Server} from 'http';
 import * as express from 'express';
 import * as mongoose from "mongoose";
 import * as socketIo from 'socket.io';
-import { Message } from './chat';
 import * as chatContoller from './chat/chatController';
 import {APILogger} from "./utils/logger";
 import * as config from "config";
 
 export class ChatServer {
-    public static readonly PORT:number = 8080;
+    public static readonly PORT: number = 8080;
     private app: express.Application;
     private server: Server;
     private io: socketIo.Server;
     private port: string | number;
     private mongoUrl: string = config.get('mongo.URI');
-    private clients =[];
+    private clients = new Map();
+    private socket
+
     constructor() {
         this.createApp();
         this.config();
         this.createServer();
         this.sockets();
         this.listen();
+    }
+
+    public getApp(): express.Application {
+        return this.app;
     }
 
     private createApp(): void {
@@ -36,53 +41,51 @@ export class ChatServer {
         this.port = process.env.PORT || ChatServer.PORT;
     }
 
-    private async sockets(){
+    private async sockets() {
         this.io = socketIo(this.server);
         await this.mongoSetup();
     }
 
-    private listen(): void {
+    private async listen() {
         this.server.listen(this.port, () => {
             console.log('Running server on port %s', this.port);
         });
 
-        this.io.on('connect', (socket: any) => {
-            console.log('Connected client on port %s.', this.port);
-            socket.on('storeClientInfo', function (data) {
-                let clientInfo = {
-                    customId : data.customId,
-                    clientId : socket.id
-                };
-                this.clients.push(clientInfo);
-                this.io.broadcast.emit('broadcastClientInfo', this.clients);
-                this.io.emit('selfBroadcastClientInfo', this.clients);
-            });
+        this.io.on('connect', this.connect.bind(this));
+    }
 
-            socket.on('message', (m: Message) => {
-                console.log('[server](message): %s', JSON.stringify(m));
-                this.io.emit('receive_message', m);
-                //store message on mongod
-                const message = JSON.parse(JSON.stringify(m));
-                console.log("storing chat to db 1", message)
+    private connect(socket) {
+        console.log('Connected client on port %s.', this.port);
+        this.socket = socket;
+        socket.on('storeClientInfo', this.storeClientInfo.bind(this));
+        socket.on('sendMessage', this.message.bind(this));
 
-                for (let client of this.clients) {
-                    console.log("client info", client)
-                    if(client.customId === message.receiver){
-
-                        this.io.to(client.clientId).emit('testmessage',message);
-                    }
-                }
-
-
-                chatContoller.storeChattoDB(message.user1, message.user2, message.content, message.timestamp);
-
-            });
-
-            socket.on('disconnect', () => {
-                console.log('Client disconnected');
-            });
+        socket.on('disconnect', () => {
+            console.log('Client disconnected');
         });
     }
+
+    private storeClientInfo(data) {
+        console.log(this.socket.id)
+        this.clients[data.userId] = this.socket.id
+    }
+
+    private async message(message) {
+        console.log('[server](message): %s', JSON.stringify(message));
+
+        const user1 = message.user1
+        const user2 = message.user2
+
+        const receiverId = (user1 === message.senderId) ? user2 : user1;
+
+        const receiverSocketId = this.clients[receiverId];
+        if (receiverSocketId) {
+            this.io.emit('reply', message);
+        }
+
+        await chatContoller.storeChatoDB(user1,user2, message.senderId, message.content, message.timestamp);
+    }
+
     private async mongoSetup() {
         try {
             await mongoose.connect(this.mongoUrl, {socketOptions: config.get("mongo.config")});
@@ -94,8 +97,5 @@ export class ChatServer {
                 `Connection to MONGO DB failed : ${err} - Shutting down Server`
             );
         }
-    }
-    public getApp(): express.Application {
-        return this.app;
     }
 }

@@ -168,11 +168,10 @@ export let confirmEmail = async (req: Request, res: Response, next: NextFunction
 
 
 export let getUserId = async (req: Request, res: Response, next: NextFunction) => {
-    let token = req.header('Authorization');
+    const token = req.header('Authorization');
     const currentuser = await getUserByToken(token);
     if (currentuser) {
-        //res.status(400).send(err)
-        return formatOutput(res, currentuser._id, 200, "chatunit");
+        return res.status(200).send(currentuser._id);
     } else {
         console.log("data not found");
         return res.status(400).send('User not found')
