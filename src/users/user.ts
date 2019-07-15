@@ -14,7 +14,8 @@ export interface IUser {
     isVerifiedByMail: boolean;
     isVerifiedBySocialMedia: boolean;
     accessTokenFacebook: String,
-    accessTokenLinkedIn: String
+    accessTokenLinkedIn: String,
+    type: Type;
 }
 
 export interface IUserModel extends IUser, Document {
@@ -22,7 +23,7 @@ export interface IUserModel extends IUser, Document {
 }
 
 export const UserSchema: Schema = new Schema({
-    jwt_token: {type: String, unique: true},
+    jwt_token: {type: String, unique: true, sparse: true},
     email: {type: String, unique: true},
     password: String,
     firstName: String,
@@ -33,7 +34,8 @@ export const UserSchema: Schema = new Schema({
     isVerifiedByMail: {type: Boolean, default: false},
     isVerifiedBySocialMedia: {type: Boolean, default: false},
     accessTokenFacebook: String,
-    accessTokenLinkedIn: String
+    accessTokenLinkedIn: String,
+    type: {type: String, enum: this.Type}
 }, {versionKey: false});
 
 UserSchema.methods.fullName = function (): string {
