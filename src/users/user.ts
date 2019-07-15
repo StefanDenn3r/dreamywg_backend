@@ -11,16 +11,17 @@ export interface IUser {
     gender: Gender;
     dateOfBirth: Date;
     residenceId?: string;
-    isVerified: boolean;
-    finishedRegistrationProcess: boolean;
-    type: Type;
+    isVerifiedByMail: boolean;
+    isVerifiedBySocialMedia: boolean;
+    accessTokenFacebook: String,
+    accessTokenLinkedIn: String
 }
 
 export interface IUserModel extends IUser, Document {
     fullName(): string;
 }
 
-export var UserSchema: Schema = new Schema({
+export const UserSchema: Schema = new Schema({
     jwt_token: {type: String, unique: true},
     email: {type: String, unique: true},
     password: String,
@@ -29,8 +30,10 @@ export var UserSchema: Schema = new Schema({
     phoneNumber: String,
     gender: {type: String, enum: this.Gender},
     dateOfBirth: Date,
-    isVerified: {type: Boolean, default: false},
-    type: {type: String, enum: this.Type},
+    isVerifiedByMail: {type: Boolean, default: false},
+    isVerifiedBySocialMedia: {type: Boolean, default: false},
+    accessTokenFacebook: String,
+    accessTokenLinkedIn: String
 }, {versionKey: false});
 
 UserSchema.methods.fullName = function (): string {
