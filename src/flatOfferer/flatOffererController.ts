@@ -1,28 +1,28 @@
 import {NextFunction, Request, Response} from "express";
-import {FlatOfferer} from "./flatOfferer";
-import {APILogger} from "../utils/logger";
-import {formatOutput, formatUser} from "../utils";
-import {getUserByToken} from "../users/userController";
 import {Flat} from "../flats/flat";
+import {getUserByToken} from "../users/userController";
+import {formatOutput, formatUser} from "../utils";
+import {APILogger} from "../utils/logger";
 import {Type} from "../utils/selectionEnums";
+import {FlatOfferer} from "./flatOfferer";
 
 export let removeAllFlatOfferers = async (req: Request, res: Response) => {
     APILogger.logger.warn(`[DELETE] [/flatOfferers]`);
 
-    let flatOfferers = await FlatOfferer.find();
+    const flatOfferers = await FlatOfferer.find();
     await flatOfferers.forEach(async (flatOfferer) => await flatOfferer.remove());
 
     return res.status(204).send();
 };
 
 
-//TODO add try catch to every await
+// TODO add try catch to every await
 export let getFlatOfferers = async (
     req: Request,
     res: Response,
     next: NextFunction
 ) => {
-    let flatOfferer = await FlatOfferer.find();
+    const flatOfferer = await FlatOfferer.find();
     if (!flatOfferer) {
         APILogger.logger.info(`[GET] [/flatofferers] something went wrong`);
         return res.status(404).send();
@@ -40,7 +40,7 @@ export let getFlatOfferer = async (
 
     APILogger.logger.info(`[GET] [/flatofferer] ${id}`);
 
-    let flatOfferer = await FlatOfferer.findById(id);
+    const flatOfferer = await FlatOfferer.findById(id);
     if (!flatOfferer) {
         APILogger.logger.info(`[GET] [/flatofferer/:{id}] flatofferer with id ${id} not found`);
         return res.status(404).send();
