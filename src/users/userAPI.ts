@@ -2,6 +2,8 @@ import * as userController from './userController'
 
 export class UserRoute {
     public static routes(app): void {
+        app.route('/users/oauthLinkedin').get(userController.oAuthLinkedIn);
+        app.route('/users/oauthFacebook').get(userController.oAuthFacebook);
         app.route('/users').post(userController.addUser);
         app.route('/users').patch(userController.updateUser);
         app.route('/users').delete(userController.removeAllUsers);
