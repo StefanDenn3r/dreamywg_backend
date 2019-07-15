@@ -80,7 +80,7 @@ export class ChatServer {
 
         const receiverSocketId = this.clients[receiverId];
         if (receiverSocketId) {
-            this.io.emit('reply', message);
+            this.io.to(receiverSocketId).emit('reply', message);
         }
 
         await chatContoller.storeChatoDB(user1,user2, message.senderId, message.content, message.timestamp);
