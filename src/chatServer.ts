@@ -14,7 +14,7 @@ export class ChatServer {
     private io: socketIo.Server;
     private port: string | number;
     private mongoUrl: string = config.get('mongo.URI');
-
+    private clients =[];
     constructor() {
         this.createApp();
         this.config();
@@ -48,13 +48,27 @@ export class ChatServer {
 
         this.io.on('connect', (socket: any) => {
             console.log('Connected client on port %s.', this.port);
+            socket.on('storeClientInfo', function (data) {
+                let clientInfo = {
+                    customId : data.customId,
+                    clientId : socket.id
+                };
+                this.clients.push(clientInfo);
+                this.io.broadcast.emit('broadcastClientInfo', this.clients);
+                this.io.emit('selfBroadcastClientInfo', this.clients);
+            });
+
             socket.on('message', (m: Message) => {
                 console.log('[server](message): %s', JSON.stringify(m));
                 this.io.emit('receive_message', m);
                 //store message on mongod
                 const message = JSON.parse(JSON.stringify(m));
                 console.log("storing chat to db 1")
+
+                this.io.to(message.socketreceiverId).emit('testmessage',message);
+
                 chatContoller.storeChattoDB(message.user1, message.user2, message.content, message.timestamp);
+
             });
 
             socket.on('disconnect', () => {

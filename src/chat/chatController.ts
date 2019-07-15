@@ -47,7 +47,7 @@ export let storeChattoDB = async (user1: string, user2: string, content: string,
         //create random message id
         createNewChat(user1, user2, content, timestamp);
     }else{
-        updateChat(chatUnit._id, user1, user2, content, timestamp);
+        updateChat(chatUnit._id, content, timestamp);
     }
 };
 
