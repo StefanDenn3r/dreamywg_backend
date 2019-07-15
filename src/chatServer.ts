@@ -83,7 +83,7 @@ export class ChatServer {
             this.io.to(receiverSocketId).emit('reply', message);
         }
 
-        await chatContoller.storeChatoDB(user1,user2, message.senderId, message.content, message.timestamp);
+        await chatContoller.storeChatToDB(user1,user2, message.senderId, message.content, message.timestamp);
     }
 
     private async mongoSetup() {

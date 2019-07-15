@@ -35,14 +35,11 @@ export let retrieveChatUnit = async (req: Request, res: Response, next: NextFunc
     }
 };
 
-export let storeChatoDB = async (user1: string, user2: string, senderId: string, content: string, timestamp: Date) => {
-    // check message existence
-
+export let storeChatToDB = async (user1: string, user2: string, senderId: string, content: string, timestamp: Date) => {
     const chatUnit = await MessageUnit.findOne({$or: [{$and: [{user1: user1}, {user2: user2}]}, {$and: [{user1: user2}, {user2: user1}]}]});
-    // create new random message id
     if (!chatUnit) {
         // create random message id
-        await createNewChat(user1, user2, senderId, content, timestamp);
+        await createNewChat(user1, user2);
     } else {
         await updateChat(chatUnit._id, senderId, content, timestamp);
     }
@@ -65,15 +62,11 @@ export let updateChat = async (messageId, senderId, content, timestamp) => {
     }
 };
 
-export let createNewChat = async (user1, user2, senderId, content, timestamp) => {
+export let createNewChat = async (user1, user2) => {
     const newMessage = new MessageUnit({
         user1: user1,
         user2: user2,
-        messages: [{
-            senderId: senderId,
-            content: content,
-            timestamp: timestamp
-        }]
+        messages: []
     });
 
     try {
@@ -98,17 +91,16 @@ export let deleteChat = async (req: Request, res: Response, next: NextFunction) 
 
 };
 
-export let initChatwithAllUsers = async (req: Request, res: Response, next: NextFunction) => {
+export let initChatWithAllUsers = async (req: Request, res: Response, next: NextFunction) => {
     const token = req.header('Authorization');
     const currentuser = await getUserByToken(token);
     const users = await User.find();
     users.forEach(async user => {
         if (user._id.toString() !== currentuser._id.toString()) {
-            console.log("creating new chat for each user");
-            await createNewChat(currentuser._id, user._id, user._id, "Hey", Date.now()); // create new chat except for self
+            await createNewChat(currentuser._id, user._id); // create new chat except for self
         }
     });
-    return;
+    return res.status(200).send();
 };
 
 export let removeAllChat = async (req: Request, res: Response, next: NextFunction) => {
