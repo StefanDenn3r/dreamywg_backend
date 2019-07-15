@@ -63,9 +63,16 @@ export class ChatServer {
                 this.io.emit('receive_message', m);
                 //store message on mongod
                 const message = JSON.parse(JSON.stringify(m));
-                console.log("storing chat to db 1")
+                console.log("storing chat to db 1", message)
 
-                this.io.to(message.socketreceiverId).emit('testmessage',message);
+                for (let client of this.clients) {
+                    console.log("client info", client)
+                    if(client.customId === message.receiver){
+
+                        this.io.to(client.clientId).emit('testmessage',message);
+                    }
+                }
+
 
                 chatContoller.storeChattoDB(message.user1, message.user2, message.content, message.timestamp);
 
