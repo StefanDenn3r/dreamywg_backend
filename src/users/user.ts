@@ -14,8 +14,7 @@ export interface IUser {
     isVerifiedByMail: boolean;
     isVerifiedBySocialMedia: boolean;
     accessTokenFacebook: String,
-    accessTokenLinkedIn: String
-    finishedRegistrationProcess: boolean;
+    accessTokenLinkedIn: String,
     type: Type;
 }
 
@@ -37,7 +36,6 @@ export const UserSchema: Schema = new Schema({
     accessTokenFacebook: String,
     accessTokenLinkedIn: String,
     type: {type: String, enum: this.Type},
-    finishedRegistrationProcess:  {type: Boolean, default: false};
 }, {versionKey: false});
 
 UserSchema.methods.fullName = function (): string {
@@ -46,7 +44,7 @@ UserSchema.methods.fullName = function (): string {
 
 // transformer : should be separated in different file if big enough
 UserSchema.set('toJSON', {
-    transform: function (doc, ret) {
+    transform: (doc, ret) => {
         ret.dateOfBirth = new Date(ret.dateOfBirth).toLocaleDateString();
         delete ret.password;
         return ret;
