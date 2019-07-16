@@ -1,4 +1,4 @@
-import {FlatshareExperience, flatshareType, genderRestrictions, Occupations, rentType} from "../utils/selectionEnums";
+import {FlatshareExperience, flatshareType, genderRestrictions, occupation, rentType} from "../utils/selectionEnums";
 import {Document, model, Model, models, Schema} from "mongoose";
 import {IUser} from "../users/user";
 
@@ -8,12 +8,12 @@ import {IUser} from "../users/user";
 interface IFlatSeeker {
     user: IUser,
     personalInformation: {
-        occupation: Occupations,
+        occupation: occupation,
         field: String,
         flatshareExperience: FlatshareExperience,
-        languages: [String],
-        practiceOfAbstaining: [String],
-        hobbies: [String],
+        languages: String[],
+        practiceOfAbstaining: String[],
+        hobbies: String[],
         age: Number,
         socialMedia: String
         description: String,
@@ -24,9 +24,9 @@ interface IFlatSeeker {
     },
     preferences: {
         flat: {
-            regions: [String],
-            stations: [String],
-            stores: [String],
+            regions: String[],
+            stations: String[],
+            stores: String[],
             flatshareType: flatshareType,
             room: {
                 size: {
@@ -38,7 +38,7 @@ interface IFlatSeeker {
                     to: Number,
                 }
                 rentType: rentType,
-                dateAvailableRange: [Date],
+                dateAvailableRange: Date[],
                 dateAvailable: Date,
                 furnished: Boolean,
             }
@@ -70,7 +70,7 @@ interface IFlatSeeker {
         genderRestriction: genderRestrictions,
         cleanliness: String
         cleaningSchedule: String
-        activities: [String]
+        activities: String[]
         smokers: Boolean
         pets: Boolean
     }
@@ -82,7 +82,7 @@ export interface IFlatSeekerModel extends IFlatSeeker, Document {
 export const FlatSeekerSchema = new Schema({
     user: {type: Schema.Types.ObjectId, ref: 'User'},
     personalInformation: {
-        occupation: {type: String, enum: this.Occupations},
+        occupation: {type: String, enum: this.occupation},
         field: String,
         flatshareExperience: {type: String, enum: this.FlatshareExperience},
         languages: [String],
