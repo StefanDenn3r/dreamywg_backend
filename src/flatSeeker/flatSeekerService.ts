@@ -127,7 +127,7 @@ export const matchOnDb = async (flatSeeker: IFlatSeekerModel) => {
             .filter(flat => NonUndefined(preferences.flat.room.dateAvailable, preferences.flat.room.dateAvailable <= flat.rooms[0].dateAvailable))
             .filter(flat => flat.flatmates.every(flatmate => inBetween(preferences.flatmates.age, flatmate.age)))
             .filter(flat => {
-                    return NonEmpty(preferences.flat.room.dateAvailableRange,
+                return NonEmpty(preferences.flat.room.dateAvailableRange,
                         flat.rooms[0].dateAvailableRange[0] <= new Date(preferences.flat.room.dateAvailableRange[0])
                         && flat.rooms[0].dateAvailableRange[1] >= new Date(preferences.flat.room.dateAvailableRange[1]));
                 }
