@@ -11,6 +11,7 @@ import {APILogger} from '../utils/logger'
 import {IUserModel, User} from './user'
 import {sendVerificationMail} from './userService'
 
+const serverUrl = `http://${config.get('host')}:${config.get('port')}`;
 
 // TODO add try catch to every await
 export let getUsers = async (req: Request, res: Response, next: NextFunction) => {
@@ -172,9 +173,9 @@ export let oAuthLinkedIn = async (req: Request, res: Response, next: NextFunctio
 
     if (code && state) {
         try {
-            const redirectUrl = `${config.get('serverUrl')}/users/oauthLinkedin`;
-            const clientId = "78guq2rtxaouam";
-            const clientSecret = "tWZPBjm8WgX9ngaH";
+            const redirectUrl = `${serverUrl}/users/oauthLinkedin`;
+            const clientId = config.get('linkedIn.clientId');
+            const clientSecret = config.get('linkedIn.clientSecret');
             const data = querystring.stringify({
                 grant_type: "authorization_code",
                 code: code,
@@ -196,6 +197,7 @@ export let oAuthLinkedIn = async (req: Request, res: Response, next: NextFunctio
             return res.redirect(`http://${config.get('host')}:${config.get('frontend_port')}/login`);
 
         } catch (e) {
+            console.log(e)
         }
     }
 };
@@ -206,9 +208,9 @@ export let oAuthFacebook = async (req: Request, res: Response, next: NextFunctio
 
     if (code && state) {
         try {
-            const clientId = `595941830904271`;
-            const redirectUrl = `${config.get('serverUrl')}/users/oauthFacebook`;
-            const clientSecret = "c68a35d1246498371ce21c3277753016";
+            const redirectUrl = `${serverUrl}/users/oauthFacebook`;
+            const clientId = config.get('facebook.clientId');
+            const clientSecret = config.get('facebook.clientSecret');
             const data = {
                 grant_type: "authorization_code",
                 code: code,
