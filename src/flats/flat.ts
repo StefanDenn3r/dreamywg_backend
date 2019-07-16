@@ -4,7 +4,7 @@ import {
     flatshareType,
     Gender,
     genderRestrictions,
-    Occupations,
+    occupation,
     rentType
 } from "../utils/selectionEnums";
 
@@ -12,12 +12,15 @@ import {
  * Flat
  */
 export interface IFlat {
-    region: string,
-    street: string,
-    houseNr: number,
-    flatSize: number,
-    stations: [string],
-    stores: [string],
+    title: String,
+    shortDescription: String,
+    longDescription: String,
+    region: String,
+    street: String,
+    houseNr: Number,
+    flatSize: Number,
+    stations: String[],
+    stores: String[],
     flatshareType: flatshareType,
     genderRestriction: genderRestrictions,
     flatEquipment: {
@@ -38,21 +41,21 @@ export interface IFlat {
         lastName: String,
         age: Number,
         description: String,
-        languages: [String],
-        practiceOfAbstaining: [String],
-        occupation: Occupations,
+        languages: String[],
+        practiceOfAbstaining: String[],
+        occupation: occupation,
         field: String,
-        hobbies: [String],
+        hobbies: String[],
         socialMedia: String
     }],
     rooms: [{
         roomSize: Number,
         rent: Number,
         rentType: rentType,
-        dateAvailableRange: [Date],
+        dateAvailableRange: Date[],
         dateAvailable: Date,
         furnished: Boolean,
-        images: [ArrayBuffer]
+        images: ArrayBuffer[]
     }],
     flatmatePreferences: {
         gender: Gender,
@@ -60,12 +63,12 @@ export interface IFlat {
             from: Number,
             to: Number
         }
-        occupations: Occupations,
+        occupations: occupation[],
         flatshareExperience: FlatshareExperience,
-        practiceOfAbstaining: [String],
+        practiceOfAbstaining: String[],
         cleanliness: String,
         cleaningSchedule: String,
-        activities: [String],
+        activities: String[],
         smokersAllowed: Boolean,
         petsAllowed: Boolean,
         weekendAbsent: Boolean
@@ -76,6 +79,9 @@ export interface IFlatModel extends IFlat, Document {
 }
 
 export const FlatSchema = new Schema({
+    title: String,
+    shortDescription: String,
+    longDescription: String,
     region: String,
     street: String,
     houseNr: Number,
@@ -104,7 +110,7 @@ export const FlatSchema = new Schema({
         description: String,
         languages: [String],
         practiceOfAbstaining: [String],
-        occupation: {type: String, enum: this.Occupations},
+        occupation: {type: String, enum: this.occupation},
         field: String,
         hobbies: [String],
         socialMedia: String
@@ -124,7 +130,7 @@ export const FlatSchema = new Schema({
             from: Number,
             to: Number
         },
-        occupations: {type: String, enum: this.Occupations},
+        occupations: [{type: String, enum: this.occupation}],
         flatshareExperience: {type: String, enum: this.FlatshareExperience},
         practiceOfAbstaining: [String],
         cleanliness: String,
