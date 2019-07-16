@@ -10,30 +10,29 @@ export let retrieveChatList = async (req: Request, res: Response, next: NextFunc
     const token = req.header('Authorization');
     const user = await getUserByToken(token);
     try {
-        const messageList = await MessageUnit.aggregate([{$match: {$or: [{user1: user._id.toString()}, {user2: user._id.toString()}]}}, {$sort: {"messages.timestamp": 1}}, {
-            $project: {
-                _messageId: 1,
-                user1: 1,
-                user2: 1,
-                messages: {$slice: ["$messages", -1]}
-            }
-        }]);
-        return res.json(messageList)
+        const messageList = await MessageUnit.find({$or: [{user1: user._id.toString()}, {user2: user._id.toString()}]}).sort({"messages.timestamp": 1});
 
-    } catch (err) {
-        return res.status(400).send(err)
+        const chats = new Map();
+        messageList.forEach(element => {
+            const receiverId = (element.user1 === user._id.toString()) ? element.user2 : element.user1;
+            chats[receiverId] = element;
+            return res
+        });
 
-    }
-};
-
-export let retrieveChatUnit = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const messageUnit = await MessageUnit.findById(req.query._id).sort({'messages.timestamp': 1});
-        return res.json(messageUnit)
+        return res.json(chats)
     } catch (err) {
         return res.status(400).send(err)
     }
 };
+
+// export let retrieveChatUnit = async (req: Request, res: Response, next: NextFunction) => {
+//     try {
+//         const messageUnit = await MessageUnit.findById(req.query._id).sort({'messages.timestamp': 1});
+//         return res.json(messageUnit)
+//     } catch (err) {
+//         return res.status(400).send(err)
+//     }
+// };
 
 export let storeChatToDB = async (user1: string, user2: string, senderId: string, content: string, timestamp: Date) => {
     const chatUnit = await MessageUnit.findOne({$or: [{$and: [{user1: user1}, {user2: user2}]}, {$and: [{user1: user2}, {user2: user1}]}]});
@@ -57,7 +56,7 @@ export let updateChat = async (messageId, senderId, content, timestamp) => {
             }
         });
     } catch (e) {
-        console.log(e)
+        console.log(e);
         return null;
     }
 };
