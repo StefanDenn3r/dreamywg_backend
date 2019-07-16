@@ -1,8 +1,14 @@
 import {Document, Model, model, Schema} from "mongoose";
 
 interface MessageUnit {
-    user1?: string;
-    user2?: string;
+    user1: {
+        id: string
+        fullName: string
+    },
+    user2: {
+        id: string
+        fullName: string
+    }
     messages?: [{
         senderId?: string,
         content?: string,
@@ -15,9 +21,15 @@ export interface MessageUnitModel extends MessageUnit, Document {
 
 }
 
-export var messageUnitSchema: Schema = new Schema({
-    user1: {type: String, required: true},
-    user2: {type: String, required: true},
+export const messageUnitSchema: Schema = new Schema({
+    user1: {
+        id: {type: String, required: true},
+        fullName: {type: String, required: true}
+    },
+    user2: {
+        id: {type: String, required: true},
+        fullName: {type: String, required: true}
+    },
     messages: [{
         senderId: {type: String, required: true},
         content: {type: String, required: true},
