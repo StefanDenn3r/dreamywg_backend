@@ -1,5 +1,5 @@
 import {Document, Model, model, models, Schema} from "mongoose";
-import {Gender} from "../utils/selectionEnums";
+import {Gender, Type} from "../utils/selectionEnums";
 
 export interface IUser {
     jwt_token: string,
@@ -15,6 +15,8 @@ export interface IUser {
     isVerifiedBySocialMedia: boolean;
     accessTokenFacebook: String,
     accessTokenLinkedIn: String
+    finishedRegistrationProcess: boolean;
+    type: Type;
 }
 
 export interface IUserModel extends IUser, Document {
@@ -33,7 +35,9 @@ export const UserSchema: Schema = new Schema({
     isVerifiedByMail: {type: Boolean, default: false},
     isVerifiedBySocialMedia: {type: Boolean, default: false},
     accessTokenFacebook: String,
-    accessTokenLinkedIn: String
+    accessTokenLinkedIn: String,
+    type: {type: String, enum: this.Type},
+    finishedRegistrationProcess:  {type: Boolean, default: false};
 }, {versionKey: false});
 
 UserSchema.methods.fullName = function (): string {
