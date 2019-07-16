@@ -9,10 +9,12 @@ import * as morgan from "morgan";
 import * as mongoose from "mongoose";
 import {APILogger, WinstonStream} from "./utils/logger";
 
+
+import {UserRoute} from './users/userAPI'
 import {FlatOffererRoute} from "./flatOfferer/flatOffererAPI";
 import {FlatSeekerRoute} from "./flatSeeker/flatSeekerAPI";
-import {UserRoute} from "./users/userAPI";
 import {FlatRoute} from './flats/flatAPI'
+import {ScheduleRoute} from './schedules/scheduleAPI'
 
 class Server {
     public app: express.Application;
@@ -78,10 +80,11 @@ class Server {
         });
 
         UserRoute.routes(this.app);
-        FlatRoute.routes(this.app);
+        FlatRoute.routes(this.app);              
         FlatOffererRoute.routes(this.app);
         FlatSeekerRoute.routes(this.app);
-        APILogger.logger.info("Applied Routes: [USER][AUTHENTICATION][BUSINESS LOGIC]");
+        ScheduleRoute.routes(this.app);
+        APILogger.logger.info('Applied Routes: [USER][FLAT][AUTHENTICATION][BUSINESS LOGIC]')
     }
 
     private async mongoSetup() {
