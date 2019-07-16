@@ -7,12 +7,8 @@ import {createMockFlats} from "./flatService";
 
 // TODO (Q) wait for flat offerer registration
 export let getFlats = async (req: Request, res: Response, next: NextFunction) => {
-<<<<<<< HEAD
-    let flats = await Flat.find();
-
-=======
     const flats = await Flat.find();
->>>>>>> master
+
     if (!flats) {
         APILogger.logger.info(`[GET] [/flats] something went wrong`);
         return res.status(404).send();
@@ -88,7 +84,7 @@ export let getFlatResidents = async (req: Request, res: Response, next: NextFunc
 
 export const generateFlats =async (req: Request, res: Response) => {
     try {
-        await createMockFlats(20000);
+        await createMockFlats(5);
         res.status(200).send()
     } catch (e) {
         return res.status(404).send(e);
