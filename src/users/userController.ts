@@ -1,16 +1,21 @@
+import axios from 'axios';
 import * as bcrypt from 'bcrypt'
+import * as config from 'config'
 import {NextFunction, Request, Response} from 'express'
 import * as halson from 'halson'
 import * as jwt from 'jsonwebtoken'
-import {IUserModel, User} from './user'
-import {APILogger} from '../utils/logger'
-import {formatOutput, formatUser} from '../utils'
+import * as querystring from 'querystring';
 import Token, {ITokenModel} from "../tokens/token";
+import {formatOutput, formatUser} from '../utils'
+import {APILogger} from '../utils/logger'
+import {IUserModel, User} from './user'
 import {sendVerificationMail} from './userService'
 
-//TODO add try catch to every await
+const serverUrl = `http://${config.get('host')}:${config.get('port')}`;
+
+// TODO add try catch to every await
 export let getUsers = async (req: Request, res: Response, next: NextFunction) => {
-    let users = await User.find();
+    const users = await User.find();
 
     if (!users) {
         APILogger.logger.info(`[GET] [/users] something went wrong`);
@@ -25,7 +30,7 @@ export let getUser = async (req: Request, res: Response, next: NextFunction) => 
 
     APILogger.logger.info(`[GET] [/users] ${id}`);
 
-    let user = await User.findById(id);
+    const user = await User.findById(id);
     if (!user) {
         APILogger.logger.info(`[GET] [/users/:{id}] user with id ${id} not found`);
         return res.status(404).send()
@@ -55,7 +60,7 @@ export let addUser = async (req: Request, res: Response, next: NextFunction) => 
 };
 
 export let getUserByToken = async (token: String) => {
-    let user: IUserModel = await User.findOne({jwt_token: token});
+    const user: IUserModel = await User.findOne({jwt_token: token});
     return user
 }
 
@@ -64,7 +69,7 @@ export let updateUser = async (req: Request, res: Response, next: NextFunction) 
     const id = token
     APILogger.logger.info(`[PATCH] [/users] ${id}`);
 
-    let user: IUserModel = await User.findOne({jwt_token: token});
+    const user: IUserModel = await User.findOne({jwt_token: token});
 
     if (!user) {
         APILogger.logger.info(`[PATCH] [/users/:{id}] user with id ${id} not found`);
@@ -108,7 +113,7 @@ export let login = async (req: Request, res: Response, next: NextFunction) => {
         return res.status(404).send('User not found')
     }
 
-    if (!user.isVerified) {
+    if (!user.isVerifiedByMail) {
         return res.status(412).send('Please verify you account first.')
     }
 
@@ -124,10 +129,9 @@ export let login = async (req: Request, res: Response, next: NextFunction) => {
         } catch (err) {
             return res.status(500).send(err.message);
         }
-
         return res.json({
-            token: token,
-            type: user.type
+            user: user,
+            token: token
         })
     } else {
         APILogger.logger.info(`[GET] [/users/login] user not authorized ${email}`);
@@ -137,18 +141,90 @@ export let login = async (req: Request, res: Response, next: NextFunction) => {
 
 export let confirmEmail = async (req: Request, res: Response, next: NextFunction) => {
     const tokenParam = req.params.token;
-    let token: ITokenModel = await Token.findOne({token: tokenParam});
-    if (!token) return res.status(400).send("token not found");
+    const token: ITokenModel = await Token.findOne({token: tokenParam});
+    if (!token) {
+        return res.status(400).send("token not found");
+    }
 
-    let user: IUserModel = await User.findById(token._userId);
-    if (!user) return res.status(400).send("invalid token");
+    const user: IUserModel = await User.findById(token._userId);
+    if (!user) {
+        return res.status(400).send("invalid token");
+    }
 
     // maybe add check if user already verified
-    user.isVerified = true;
+    user.isVerifiedByMail = true;
     try {
         await user.save()
     } catch (err) {
         return res.status(500).send(err.message);
     }
     return res.status(200).send("Your account has successfully been verified.");
+};
+
+export let oAuthLinkedIn = async (req: Request, res: Response, next: NextFunction) => {
+    const code = req.query.code;
+    const state = req.query.state;
+
+    if (code && state) {
+        try {
+            const redirectUrl = `${serverUrl}/users/oauthLinkedin`;
+            const clientId = config.get('linkedIn.clientId');
+            const clientSecret = config.get('linkedIn.clientSecret');
+            const data = querystring.stringify({
+                grant_type: "authorization_code",
+                code: code,
+                state: state,
+                redirect_uri: redirectUrl,
+                client_id: clientId,
+                client_secret: clientSecret
+            });
+            const linkedInURL = 'https://www.linkedin.com/oauth/v2/accessToken';
+            const result = await axios.post(linkedInURL, data, {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            });
+            const user = await User.findById(state);
+            user.isVerifiedBySocialMedia = true;
+            user.accessTokenLinkedIn = result.data.access_token;
+            await user.save();
+            return res.redirect(`http://${config.get('host')}:${config.get('frontend_port')}/login`);
+
+        } catch (e) {
+            console.log(e)
+        }
+    }
+};
+
+export let oAuthFacebook = async (req: Request, res: Response, next: NextFunction) => {
+    const code = req.query.code;
+    const state = req.query.state;
+
+    if (code && state) {
+        try {
+            const redirectUrl = `${serverUrl}/users/oauthFacebook`;
+            const clientId = config.get('facebook.clientId');
+            const clientSecret = config.get('facebook.clientSecret');
+            const data = {
+                grant_type: "authorization_code",
+                code: code,
+                state: state,
+                redirect_uri: redirectUrl,
+                client_id: clientId,
+                client_secret: clientSecret
+            };
+            const facebookUrl = 'https://graph.facebook.com/v3.3/oauth/access_token';
+            const result = await axios.post(facebookUrl, data);
+
+            const user = await User.findById(state);
+            user.isVerifiedBySocialMedia = true;
+            user.accessTokenFacebook = result.data.access_token;
+            await user.save();
+            return res.redirect(`http://${config.get('host')}:${config.get('frontend_port')}/login`);
+
+        } catch (e) {
+
+        }
+    }
+    return res.status(400).send();
 };

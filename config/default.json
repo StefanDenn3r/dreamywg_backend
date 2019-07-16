@@ -29,5 +29,13 @@
       "pass": "Dr34myWg!"
     }
   },
+  "linkedIn": {
+    "clientId": "78guq2rtxaouam",
+    "clientSecret": "tWZPBjm8WgX9ngaH"
+  },
+  "facebook": {
+    "clientId": "595941830904271",
+    "clientSecret": "c68a35d1246498371ce21c3277753016"
+  },
   "morganFormat": "':remote-addr - :remote-user [:date[clf]] \":method :url HTTP/:http-version\" :status :res[content-length] \":referrer\" \":user-agent\""
 }
