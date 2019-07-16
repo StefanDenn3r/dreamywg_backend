@@ -1,12 +1,11 @@
-import {User, IUserModel} from './user'
-import Token, {ITokenModel} from "../tokens/token";
+import * as config from 'config'
 import * as crypto from 'crypto'
 import * as nodemailer from 'nodemailer'
-import * as config from 'config'
+import Token, {ITokenModel} from "../tokens/token";
 
 
 export let sendVerificationMail = async (user) => {
-    let token: ITokenModel = new Token({_userId: user._id, token: crypto.randomBytes(16).toString('hex')});
+    const token: ITokenModel = new Token({_userId: user._id, token: crypto.randomBytes(16).toString('hex')});
 
     await token.save();
 

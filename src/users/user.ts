@@ -11,8 +11,10 @@ export interface IUser {
     gender: Gender;
     dateOfBirth: Date;
     residenceId?: string;
-    isVerified: boolean;
-    finishedRegistrationProcess: boolean;
+    isVerifiedByMail: boolean;
+    isVerifiedBySocialMedia: boolean;
+    accessTokenFacebook: String,
+    accessTokenLinkedIn: String,
     type: Type;
 }
 
@@ -29,7 +31,10 @@ export const UserSchema: Schema = new Schema({
     phoneNumber: String,
     gender: {type: String, enum: this.Gender},
     dateOfBirth: Date,
-    isVerified: {type: Boolean, default: false},
+    isVerifiedByMail: {type: Boolean, default: false},
+    isVerifiedBySocialMedia: {type: Boolean, default: false},
+    accessTokenFacebook: String,
+    accessTokenLinkedIn: String,
     type: {type: String, enum: this.Type},
 }, {versionKey: false});
 
@@ -39,7 +44,7 @@ UserSchema.methods.fullName = function (): string {
 
 // transformer : should be separated in different file if big enough
 UserSchema.set('toJSON', {
-    transform: function (doc, ret) {
+    transform: (doc, ret) => {
         ret.dateOfBirth = new Date(ret.dateOfBirth).toLocaleDateString();
         delete ret.password;
         return ret;

@@ -1,6 +1,6 @@
-import {FlatshareExperience, flatshareType, genderRestrictions, occupation, rentType} from "../utils/selectionEnums";
 import {Document, model, Model, models, Schema} from "mongoose";
 import {IUser} from "../users/user";
+import {FlatshareExperience, flatshareType, genderRestrictions, occupation, rentType} from "../utils/selectionEnums";
 
 /**
  * FlatSeeker
@@ -11,9 +11,9 @@ interface IFlatSeeker {
         occupation: occupation,
         field: String,
         flatshareExperience: FlatshareExperience,
-        languages: String[],
-        practiceOfAbstaining: String[],
-        hobbies: String[],
+        languages: Array<String>,
+        practiceOfAbstaining: Array<String>,
+        hobbies: Array<String>,
         age: Number,
         socialMedia: String
         description: String,
@@ -24,9 +24,9 @@ interface IFlatSeeker {
     },
     preferences: {
         flat: {
-            regions: String[],
-            stations: String[],
-            stores: String[],
+            regions: Array<String>,
+            stations: Array<String>,
+            stores: Array<String>,
             flatshareType: flatshareType,
             room: {
                 size: {
@@ -38,7 +38,7 @@ interface IFlatSeeker {
                     to: Number,
                 }
                 rentType: rentType,
-                dateAvailableRange: Date[],
+                dateAvailableRange: Array<Date>,
                 dateAvailable: Date,
                 furnished: Boolean,
             }
@@ -70,7 +70,7 @@ interface IFlatSeeker {
         genderRestriction: genderRestrictions,
         cleanliness: String
         cleaningSchedule: String
-        activities: String[]
+        activities: Array<String>
         smokers: Boolean
         pets: Boolean
     }
