@@ -5,5 +5,6 @@ export class FlatOffererRoute {
         app.route("/flatofferers/:id").get(flatOffererController.getFlatOfferer)
         app.route("/flatofferers").get(flatOffererController.getFlatOfferers)
         app.route("/flatofferers").post(flatOffererController.addFlatOfferer)
+        app.route("/flatofferers").delete(flatOffererController.deleteAllFlatOfferers)
     }
 }
