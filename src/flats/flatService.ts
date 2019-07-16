@@ -1428,7 +1428,7 @@ const generateFlatmate = (index) => {
     return result;
 };
 
-const generateFlat = (index) => {
+const generateFlat:any = (index) => {
     return {
         title: `title_${index}`,
         shortDescription: `We are an awesome WG! ${index}`,
