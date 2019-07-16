@@ -76,14 +76,14 @@ export class ChatServer {
         const user1 = message.user1
         const user2 = message.user2
 
-        const receiverId = (user1 === message.senderId) ? user2 : user1;
+        const receiverId = (user1.id === message.senderId) ? user2.id : user1.id;
 
         const receiverSocketId = this.clients[receiverId];
         if (receiverSocketId) {
             this.io.to(receiverSocketId).emit('reply', message);
         }
 
-        await chatContoller.storeChatToDB(user1,user2, message.senderId, message.content, message.timestamp);
+        await chatContoller.storeChatToDB(user1, user2, message.senderId, message.content, message.timestamp);
     }
 
     private async mongoSetup() {

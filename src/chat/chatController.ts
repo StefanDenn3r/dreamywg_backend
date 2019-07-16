@@ -10,11 +10,11 @@ export let retrieveChatList = async (req: Request, res: Response, next: NextFunc
     const token = req.header('Authorization');
     const user = await getUserByToken(token);
     try {
-        const messageList = await MessageUnit.find({$or: [{user1: user._id.toString()}, {user2: user._id.toString()}]}).sort({"messages.timestamp": 1});
+        const messageList = await MessageUnit.find({$or: [{'user1.id': user._id.toString()}, {'user2.id': user._id.toString()}]}).sort({"messages.timestamp": 1});
 
         const chats = new Map();
         messageList.forEach(element => {
-            const receiverId = (element.user1 === user._id.toString()) ? element.user2 : element.user1;
+            const receiverId = (element.user1.id === user._id.toString()) ? element.user2.id : element.user1.id;
             chats[receiverId] = element;
             return res
         });
@@ -25,18 +25,9 @@ export let retrieveChatList = async (req: Request, res: Response, next: NextFunc
     }
 };
 
-// export let retrieveChatUnit = async (req: Request, res: Response, next: NextFunction) => {
-//     try {
-//         const messageUnit = await MessageUnit.findById(req.query._id).sort({'messages.timestamp': 1});
-//         return res.json(messageUnit)
-//     } catch (err) {
-//         return res.status(400).send(err)
-//     }
-// };
-
-export let storeChatToDB = async (user1: string, user2: string, senderId: string, content: string, timestamp: Date) => {
-    const chatUnit = await MessageUnit.findOne({$or: [{$and: [{user1: user1}, {user2: user2}]}, {$and: [{user1: user2}, {user2: user1}]}]});
-    if (!chatUnit) {
+export let storeChatToDB = async (user1, user2, senderId, content, timestamp: Date) => {
+    const chatUnit = await MessageUnit.findOne({$or: [{$and: [{'user1.id': user1.id}, {'user2.id': user2.id}]}, {$and: [{'user1.id': user2.id}, {'user2.id': user1.id}]}]});
+    if (!chatUnit) { // todo: maybbe to delete
         // create random message id
         await createNewChat(user1, user2);
     } else {
@@ -80,13 +71,9 @@ export let deleteChat = async (req: Request, res: Response, next: NextFunction) 
 
     APILogger.logger.warn(`[DELETE] [/users] ${id}`);
 
-    const messageunit = await MessageUnit.findById(id);
-    if (!messageunit) {
-        APILogger.logger.info(`[DELETE] [/users/:{id}] message not found`);
-        return res.status(404).send()
-    }
+    await MessageUnit.findByIdAndDelete(id);
 
-    return messageunit.remove(() => res.status(204).send())
+    return res.status(204).send()
 
 };
 
@@ -96,10 +83,17 @@ export let initChatWithAllUsers = async (req: Request, res: Response, next: Next
     const users = await User.find();
     users.forEach(async user => {
         if (user._id.toString() !== currentuser._id.toString()) {
-            await createNewChat(currentuser._id, user._id); // create new chat except for self
+            await createNewChat(convertToMessageUser(currentuser), convertToMessageUser(user));
         }
     });
     return res.status(200).send();
+};
+
+const convertToMessageUser = (user) => {
+    return {
+        id: user.id,
+        fullName: user.fullName()
+    }
 };
 
 export let removeAllChat = async (req: Request, res: Response, next: NextFunction) => {
