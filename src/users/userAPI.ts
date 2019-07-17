@@ -6,8 +6,8 @@ export class UserRoute {
         app.route('/users/oauthFacebook').get(userController.oAuthFacebook);
         app.route('/users').post(userController.addUser);
         app.route('/users').patch(userController.updateUser);
-        app.route('/users').delete(userController.removeAllUsers);
-        app.route('/users/:id').delete(userController.removeUser);
+        app.route('/users').delete(userController.deleteAllUsers);
+        app.route('/users/:id').delete(userController.deleteUser);
         app.route('/users/:id').get(userController.getUser);
         app.route('/users').get(userController.getUsers);
         app.route('/users/login').post(userController.login);

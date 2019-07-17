@@ -4,9 +4,12 @@ import {
     flatshareType,
     Gender,
     genderRestrictions,
-    Occupations,
+    occupation,
     rentType
 } from "../utils/selectionEnums";
+
+//not sure if this is a good thing
+import {convertAddressToCoordinate} from '../utils/locationUtil'
 
 /**
  * Flat
@@ -43,7 +46,7 @@ export interface IFlat {
         description: String,
         languages: String[],
         practiceOfAbstaining: String[],
-        occupation: Occupations,
+        occupation: occupation,
         field: String,
         hobbies: String[],
         socialMedia: String
@@ -63,7 +66,7 @@ export interface IFlat {
             from: Number,
             to: Number
         }
-        occupations: Occupations,
+        occupations: occupation[],
         flatshareExperience: FlatshareExperience,
         practiceOfAbstaining: String[],
         cleanliness: String,
@@ -76,6 +79,8 @@ export interface IFlat {
 }
 
 export interface IFlatModel extends IFlat, Document {
+    getFullAddress();
+    getCoordinate();
 }
 
 export const FlatSchema = new Schema({
@@ -110,7 +115,7 @@ export const FlatSchema = new Schema({
         description: String,
         languages: [String],
         practiceOfAbstaining: [String],
-        occupation: {type: String, enum: this.Occupations},
+        occupation: {type: String, enum: this.occupation},
         field: String,
         hobbies: [String],
         socialMedia: String
@@ -130,7 +135,7 @@ export const FlatSchema = new Schema({
             from: Number,
             to: Number
         },
-        occupations: {type: String, enum: this.Occupations},
+        occupations: [{type: String, enum: this.occupation}],
         flatshareExperience: {type: String, enum: this.FlatshareExperience},
         practiceOfAbstaining: [String],
         cleanliness: String,
@@ -141,5 +146,13 @@ export const FlatSchema = new Schema({
         weekendAbsent: {type: Boolean, default: false},
     },
 });
+
+FlatSchema.methods.getFullAddress = function (): string {
+    return `${this.region.trim()} ${this.street.trim()}, ${this.houseNr}`;
+};
+
+FlatSchema.methods.getCoordinates = async function () {
+    return await convertAddressToCoordinate(this.getFullAddress());
+};
 
 export const Flat: Model<IFlatModel> = models.Flat || model<IFlatModel>("Flat", FlatSchema);
