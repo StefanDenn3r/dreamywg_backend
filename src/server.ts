@@ -1,21 +1,23 @@
 import * as bodyParser from "body-parser";
 import * as compression from "compression";
-import * as helmet from "helmet";
-import * as cors from "cors";
-import * as errorHandler from "./utils/errorHandler";
-import * as express from "express";
 import * as config from "config";
-import * as morgan from "morgan";
+import * as cors from "cors";
+import * as express from "express";
+import * as helmet from "helmet";
 import * as mongoose from "mongoose";
+import * as morgan from "morgan";
+import * as errorHandler from "./utils/errorHandler";
 import {APILogger, WinstonStream} from "./utils/logger";
+
 
 import {FlatOffererRoute} from "./flatOfferer/flatOffererAPI";
 import {FlatSeekerRoute} from "./flatSeeker/flatSeekerAPI";
-import {UserRoute} from "./users/userAPI";
 import {FlatRoute} from './flats/flatAPI';
 import {ChatRoute} from './chat/chatAPI';
+import {ScheduleRoute} from './schedules/scheduleAPI'
+import {UserRoute} from './users/userAPI'
 
-class Server {
+export default class Server {
     public app: express.Application;
     public userRoutes: UserRoute = new UserRoute();
     public flatRoutes: UserRoute = new FlatRoute();
@@ -70,7 +72,7 @@ class Server {
     }
 
     private applyRoutes(): void {
-        this.app.use(function (req, res, next) {
+        this.app.use((req, res, next) => {
             res.header("Access-Control-Allow-Origin", "*");
             res.header(
                 "Access-Control-Allow-Headers",
@@ -83,8 +85,8 @@ class Server {
         FlatRoute.routes(this.app);
         FlatOffererRoute.routes(this.app);
         FlatSeekerRoute.routes(this.app);
+        ScheduleRoute.routes(this.app);
         ChatRoute.routes(this.app);
-        APILogger.logger.info("Applied Routes: [USER][AUTHENTICATION][BUSINESS LOGIC]");
     }
 
     private async mongoSetup() {
@@ -100,5 +102,3 @@ class Server {
         }
     }
 }
-
-export default Server;

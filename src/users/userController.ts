@@ -11,6 +11,7 @@ import {APILogger} from '../utils/logger'
 import {IUserModel, User} from './user'
 import {sendVerificationMail} from './userService'
 
+const serverUrl = `http://${config.get('host')}:${config.get('port')}`;
 
 // TODO add try catch to every await
 export let getUsers = async (req: Request, res: Response, next: NextFunction) => {
@@ -41,7 +42,6 @@ export let getUser = async (req: Request, res: Response, next: NextFunction) => 
 
 export let addUser = async (req: Request, res: Response, next: NextFunction) => {
     const newUser = new User(req.body);
-
     try {
         newUser.password = bcrypt.hashSync(newUser.password, 10)
     } catch (err) {
@@ -75,7 +75,7 @@ export let updateUser = async (req: Request, res: Response, next: NextFunction) 
         APILogger.logger.info(`[PATCH] [/users/:{id}] user with id ${id} not found`);
         return res.status(404).send()
     }
-
+    
     user.firstName = req.body.firstName || user.firstName;
     user.lastName = req.body.lastName || user.lastName;
     user.email = req.body.email || user.email;
@@ -84,25 +84,20 @@ export let updateUser = async (req: Request, res: Response, next: NextFunction) 
     return user.save(() => res.status(204).send())
 };
 
-export let removeUser = async (req: Request, res: Response, next: NextFunction) => {
+export let deleteUser = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
 
     APILogger.logger.warn(`[DELETE] [/users] ${id}`);
 
-    const user = await User.findById(id);
-    if (!user) {
-        APILogger.logger.info(`[DELETE] [/users/:{id}] user with id ${id} not found`);
-        return res.status(404).send()
-    }
+    await User.findByIdAndDelete(id);
 
-    return user.remove(() => res.status(204).send())
+    return res.status(204).send()
 };
 
-export let removeAllUsers = async (req: Request, res: Response, next: NextFunction) => {
+export let deleteAllUsers = async (req: Request, res: Response, next: NextFunction) => {
     APILogger.logger.warn(`[DELETE] [/users]`);
 
-    const users = await User.find();
-    await users.forEach(async (user) => await user.remove());
+    await User.remove({})
 
     return res.status(204).send();
 };
@@ -186,9 +181,9 @@ export let oAuthLinkedIn = async (req: Request, res: Response, next: NextFunctio
 
     if (code && state) {
         try {
-            const redirectUrl = `${config.get('serverUrl')}/users/oauthLinkedin`;
-            const clientId = "78guq2rtxaouam";
-            const clientSecret = "tWZPBjm8WgX9ngaH";
+            const redirectUrl = `${serverUrl}/users/oauthLinkedin`;
+            const clientId = config.get('linkedIn.clientId');
+            const clientSecret = config.get('linkedIn.clientSecret');
             const data = querystring.stringify({
                 grant_type: "authorization_code",
                 code: code,
@@ -210,6 +205,7 @@ export let oAuthLinkedIn = async (req: Request, res: Response, next: NextFunctio
             return res.redirect(`http://${config.get('host')}:${config.get('frontend_port')}/login`);
 
         } catch (e) {
+            console.log(e)
         }
     }
 };
@@ -220,9 +216,9 @@ export let oAuthFacebook = async (req: Request, res: Response, next: NextFunctio
 
     if (code && state) {
         try {
-            const clientId = `595941830904271`;
-            const redirectUrl = `${config.get('serverUrl')}/users/oauthFacebook`;
-            const clientSecret = "c68a35d1246498371ce21c3277753016";
+            const redirectUrl = `${serverUrl}/users/oauthFacebook`;
+            const clientId = config.get('facebook.clientId');
+            const clientSecret = config.get('facebook.clientSecret');
             const data = {
                 grant_type: "authorization_code",
                 code: code,

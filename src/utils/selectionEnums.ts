@@ -14,7 +14,7 @@ export enum rentType {
     LIMITED = "limited"
 }
 
-export enum Occupations {
+export enum occupation {
     STUDENT = 'Student',
     WORKING = 'Working',
     ON_VACATION = 'On Vacation',
@@ -37,5 +37,6 @@ export enum flatshareType {
 
 export enum genderRestrictions {
     WOMEN_ONLY = 'Women only',
-    MEN_ONLY = 'Men only'
+    MEN_ONLY = 'Men only',
+    None = 'None'
 }

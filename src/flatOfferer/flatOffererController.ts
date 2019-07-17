@@ -6,11 +6,10 @@ import {APILogger} from "../utils/logger";
 import {Type} from "../utils/selectionEnums";
 import {FlatOfferer} from "./flatOfferer";
 
-export let removeAllFlatOfferers = async (req: Request, res: Response) => {
+export let deleteAllFlatOfferers = async (req: Request, res: Response) => {
     APILogger.logger.warn(`[DELETE] [/flatOfferers]`);
 
-    const flatOfferers = await FlatOfferer.find();
-    await flatOfferers.forEach(async (flatOfferer) => await flatOfferer.remove());
+    await FlatOfferer.remove({})
 
     return res.status(204).send();
 };
@@ -57,8 +56,8 @@ export let addFlatOfferer = async (req: Request, res: Response, next: NextFuncti
     }
 
     const flatOfferer = new FlatOfferer();
-    flatOfferer.user = user;
-    flatOfferer.flat = flat;
+    flatOfferer.user = user._id;
+    flatOfferer.flat = flat._id;
     user.type = Type.OFFERER;
 
     try {
