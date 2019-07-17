@@ -1,68 +1,47 @@
 import {NextFunction, Request, Response} from "express";
 import {User} from '../users/user'
-import {getUserByToken} from "../users/userController";
+import {getUserByToken} from "../users/userService";
 import {APILogger} from "../utils/logger";
 import MessageUnit from "./messageUnit";
+import {getFlatOffererByFlatId} from "../flatOfferer/flatService";
+import {createNewChat, getChatUnit, retrieveChatlist} from "./chatService";
 
 
-export let retrieveChatList = async (req: Request, res: Response, next: NextFunction) => {
-    console.log("calling retrieve chat list backend");
+export let createChat = async (req: Request, res: Response, next: NextFunction) => {
+    const flatId = req.params.id;
     const token = req.header('Authorization');
-    const user = await getUserByToken(token);
+
     try {
-        const messageList = await MessageUnit.find({$or: [{'user1.id': user._id.toString()}, {'user2.id': user._id.toString()}]}).sort({"messages.timestamp": 1});
+        const currentUser = convertToMessageUser(await getUserByToken(token));
+        const flatOfferer = await getFlatOffererByFlatId(flatId);
+        const targetUser = convertToMessageUser(flatOfferer.user);
 
-        const chats = new Map();
-        messageList.forEach(element => {
-            const receiverId = (element.user1.id === user._id.toString()) ? element.user2.id : element.user1.id;
-            chats[receiverId] = element;
-            return res
-        });
+        const chatUnit = await getChatUnit(currentUser, targetUser);
 
-        return res.json(chats)
+        if (!chatUnit)
+            await createNewChat(currentUser, targetUser);
+
+        const chats = await retrieveChatlist(token);
+
+        return res.status(200).send({
+                chats: chats,
+                userId: targetUser.id
+            }
+        );
     } catch (err) {
         return res.status(400).send(err)
     }
 };
 
-export let storeChatToDB = async (user1, user2, senderId, content, timestamp: Date) => {
-    const chatUnit = await MessageUnit.findOne({$or: [{$and: [{'user1.id': user1.id}, {'user2.id': user2.id}]}, {$and: [{'user1.id': user2.id}, {'user2.id': user1.id}]}]});
-    if (!chatUnit) { // todo: maybbe to delete
-        // create random message id
-        await createNewChat(user1, user2);
-    } else {
-        await updateChat(chatUnit._id, senderId, content, timestamp);
-    }
-};
 
-export let updateChat = async (messageId, senderId, content, timestamp) => {
-    try {
-        await MessageUnit.update({_id: messageId}, {
-            $push: {
-                messages: {
-                    senderId: senderId,
-                    content: content,
-                    timestamp: timestamp
-                }
-            }
-        });
-    } catch (e) {
-        console.log(e);
-        return null;
-    }
-};
-
-export let createNewChat = async (user1, user2) => {
-    const newMessage = new MessageUnit({
-        user1: user1,
-        user2: user2,
-        messages: []
-    });
+export let retrieveChatList = async (req: Request, res: Response, next: NextFunction) => {
+    const token = req.header('Authorization');
 
     try {
-        await newMessage.save()
+        const chats = await retrieveChatlist(token);
+        return res.json(chats)
     } catch (err) {
-        APILogger.logger.error(`[POST] [/users] something went wrong when saving a new message # ${err.message}`);
+        return res.status(400).send(err)
     }
 };
 
