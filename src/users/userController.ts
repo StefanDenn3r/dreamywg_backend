@@ -9,7 +9,7 @@ import Token, {ITokenModel} from "../tokens/token";
 import {formatOutput, formatUser} from '../utils'
 import {APILogger} from '../utils/logger'
 import {IUserModel, User} from './user'
-import {sendVerificationMail} from './userService'
+import {getUserByToken, sendVerificationMail} from './userService'
 
 const serverUrl = `http://${config.get('host')}:${config.get('port')}`;
 
@@ -58,11 +58,6 @@ export let addUser = async (req: Request, res: Response, next: NextFunction) => 
         return formatOutput(res, user, 200, 'user')
     })
 };
-
-export let getUserByToken = async (token: String) => {
-    const user: IUserModel = await User.findOne({jwt_token: token});
-    return user
-}
 
 export let updateUser = async (req: Request, res: Response, next: NextFunction) => {
     const token = req.header('Authorization');

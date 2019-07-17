@@ -1,6 +1,6 @@
 import {NextFunction, Request, Response} from "express";
 import {mergeWith, isArray} from "lodash";
-import {getUserByToken} from "../users/userController";
+import {getUserByToken} from "../users/userService";
 import {formatOutput, formatUser} from "../utils";
 import {APILogger} from "../utils/logger";
 import {Type} from "../utils/selectionEnums";

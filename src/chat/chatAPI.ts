@@ -3,6 +3,7 @@ import * as chatController from './chatController'
 
 export class ChatRoute {
     public static routes(app): void {
+        app.route('/chat/flat/:id').post(chatController.createChat)
         app.route('/chat').get(chatController.retrieveChatList);
         // app.route('/chatunit').get(chatController.retrieveChatUnit);
         app.route('/chatunit').delete(chatController.deleteChat);

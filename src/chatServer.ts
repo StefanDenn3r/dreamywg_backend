@@ -2,9 +2,9 @@ import {createServer, Server} from 'http';
 import * as express from 'express';
 import * as mongoose from "mongoose";
 import * as socketIo from 'socket.io';
-import * as chatContoller from './chat/chatController';
 import {APILogger} from "./utils/logger";
 import * as config from "config";
+import {updateChatUnit} from "./chat/chatService";
 
 export class ChatServer {
     public static readonly PORT: number = 8080;
@@ -83,7 +83,7 @@ export class ChatServer {
             this.io.to(receiverSocketId).emit('reply', message);
         }
 
-        await chatContoller.storeChatToDB(user1, user2, message.senderId, message.content, message.timestamp);
+        await updateChatUnit(user1, user2, message.senderId, message.content, message.timestamp);
     }
 
     private async mongoSetup() {
