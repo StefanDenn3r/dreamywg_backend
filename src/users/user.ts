@@ -44,7 +44,7 @@ UserSchema.methods.fullName = function (): string {
 
 // transformer : should be separated in different file if big enough
 UserSchema.set('toJSON', {
-    transform: function (doc, ret) {
+    transform: (doc, ret) => {
         ret.dateOfBirth = new Date(ret.dateOfBirth).toLocaleDateString();
         delete ret.password;
         return ret;
