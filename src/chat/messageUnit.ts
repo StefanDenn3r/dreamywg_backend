@@ -9,11 +9,11 @@ interface MessageUnit {
         id: string
         fullName: string
     }
-    messages?: [{
+    messages: {
         senderId?: string,
         content?: string,
         timestamp?: Date
-    }]
+    }[]
 
 }
 

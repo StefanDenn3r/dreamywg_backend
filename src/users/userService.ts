@@ -2,6 +2,7 @@ import * as config from 'config'
 import * as crypto from 'crypto'
 import * as nodemailer from 'nodemailer'
 import Token, {ITokenModel} from "../tokens/token";
+import {IUserModel, User} from "./user";
 
 
 export let sendVerificationMail = async (user) => {
@@ -20,5 +21,11 @@ export let sendVerificationMail = async (user) => {
     };
     await transporter.sendMail(mailOptions)
 };
+
+export let getUserByToken = async (token: String) => {
+    const user: IUserModel = await User.findOne({jwt_token: token});
+    return user
+}
+
 
 

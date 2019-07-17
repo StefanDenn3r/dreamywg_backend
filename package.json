@@ -32,12 +32,14 @@
     "@types/body-parser": "^1.17.0",
     "@types/chai": "^4.1.7",
     "@types/chai-http": "^3.0.5",
+    "@types/config": "0.0.34",
     "@types/express": "^4.16.0",
     "@types/express-winston": "^3.0.1",
     "@types/mocha": "^5.2.5",
     "@types/mongodb": "^3.1.25",
     "@types/mongoose": "^5.3.26",
     "@types/node": "^10.12.12",
+    "@types/nodemailer": "^6.2.0",
     "@types/winston": "^2.4.4",
     "chai": "^4.2.0",
     "cross-env": "^5.2.0",
@@ -82,6 +84,7 @@
     "https": "^1.0.0",
     "oauth": "^0.9.15",
     "axios": "latest",
-    "moment": "latest"
+    "moment": "latest",
+    "lodash": "latest"
   }
 }

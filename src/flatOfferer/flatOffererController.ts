@@ -1,10 +1,10 @@
 import {NextFunction, Request, Response} from "express";
 import {Flat} from "../flats/flat";
-import {getUserByToken} from "../users/userController";
 import {formatOutput, formatUser} from "../utils";
 import {APILogger} from "../utils/logger";
 import {Type} from "../utils/selectionEnums";
 import {FlatOfferer} from "./flatOfferer";
+import {getUserByToken} from "../users/userService";
 
 export let deleteAllFlatOfferers = async (req: Request, res: Response) => {
     APILogger.logger.warn(`[DELETE] [/flatOfferers]`);
@@ -64,7 +64,7 @@ export let addFlatOfferer = async (req: Request, res: Response, next: NextFuncti
         await user.save();
         await flat.save();
         await flatOfferer.save();
-        console.log(`Offerer successfully saved for user with email: ${flatOfferer.user.email}`);
+        console.log(`Offerer successfully saved for user with id ${user._id}`);
         return res.status(200).send();
     } catch (e) {
         APILogger.logger.info(`Something went wrong. Error: ${e}`);
