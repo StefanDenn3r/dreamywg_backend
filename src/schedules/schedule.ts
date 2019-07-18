@@ -5,11 +5,13 @@ interface ISchedule {
     date: Date;
     timeslots: ITimeSlot[];
     flatId: string;
+
 }
 
 // TODO (Q) how should I use this?
 export interface ITimeSlot {
-    time: Date;
+    startTime: Date;
+    endTime: Date;
     userId: string;
     status?: InterviewStatus;
 }
@@ -27,7 +29,13 @@ enum InterviewStatus {
 }
 
 export var TimeSlotSchema: Schema = new Schema({
-    time: {
+    startTime: {
+        type: Date,
+        default: Date(),
+        unique: true,
+        sparse: true
+    },
+    endTime: {
         type: Date,
         default: Date(),
         unique: true,
