@@ -14,7 +14,7 @@ export class ChatServer {
     private port: string | number;
     private mongoUrl: string = config.get('mongo.URI');
     private clients = new Map();
-    private socket
+    private socket;
 
     constructor() {
         this.createApp();
@@ -66,15 +66,15 @@ export class ChatServer {
     }
 
     private storeClientInfo(data) {
-        console.log(this.socket.id)
+        console.log(this.socket.id);
         this.clients[data.userId] = this.socket.id
     }
 
     private async message(message) {
         console.log('[server](message): %s', JSON.stringify(message));
 
-        const user1 = message.user1
-        const user2 = message.user2
+        const user1 = message.user1;
+        const user2 = message.user2;
 
         const receiverId = (user1.id === message.senderId) ? user2.id : user1.id;
 

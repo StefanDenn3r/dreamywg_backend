@@ -101,7 +101,6 @@ export let loadSearchProperties = async (req: Request, res: Response, next: Next
                         from: flatSeeker.preferences.flat.room.rent.from,
                         to: flatSeeker.preferences.flat.room.rent.to,
                     },
-                    furnished: flatSeeker.preferences.flat.room.furnished,
                     rentType: flatSeeker.preferences.flat.room.rentType,
                     dateAvailable: flatSeeker.preferences.flat.room.dateAvailable,
                     dateAvailableRange: flatSeeker.preferences.flat.room.dateAvailableRange,
@@ -110,10 +109,11 @@ export let loadSearchProperties = async (req: Request, res: Response, next: Next
 
             },
             flatEquipment: {
-                balcony: flatSeeker.preferences.flatEquipment.balcony
-            },
-            smokers: flatSeeker.preferences.smokers,
-            pets: flatSeeker.preferences.pets
+                balcony: flatSeeker.preferences.flatEquipment.balcony,
+                washingMachine: flatSeeker.preferences.flatEquipment.washingMachine,
+                dishwasher: flatSeeker.preferences.flatEquipment.dishwasher,
+                parkingLot: flatSeeker.preferences.flatEquipment.parkingLot
+            }
         }
     };
 
