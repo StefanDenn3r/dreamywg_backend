@@ -24,6 +24,7 @@ export interface IFlat {
     flatSize: Number,
     stations: String[],
     stores: String[],
+    images: String[],
     flatshareType: flatshareType,
     genderRestriction: genderRestrictions,
     flatEquipment: {
@@ -58,7 +59,7 @@ export interface IFlat {
         dateAvailableRange: Date[],
         dateAvailable: Date,
         furnished: Boolean,
-        images: ArrayBuffer[]
+        image: String
     }],
     flatmatePreferences: {
         gender: Gender,
@@ -93,6 +94,7 @@ export const FlatSchema = new Schema({
     flatSize: Number,
     stations: [String],
     stores: [String],
+    images: [String],
     flatshareType: {type: String, enum: this.flatshareType},
     genderRestriction: {type: String, enum: this.genderRestrictions},
     flatEquipment: {
@@ -127,7 +129,7 @@ export const FlatSchema = new Schema({
         dateAvailableRange: [Date],
         dateAvailable: Date,
         furnished: {type: Boolean, default: false},
-        images: [{data: Buffer, contentType: String}]
+        image: String
     }],
     flatmatePreferences: {
         gender: {type: String, enum: this.Gender},
