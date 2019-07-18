@@ -5,6 +5,7 @@ import {formatOutput, formatUser} from "../utils";
 import {APILogger} from "../utils/logger";
 import {Type} from "../utils/selectionEnums";
 import {FlatOfferer} from "./flatOfferer";
+import {saveImageToFile} from '../utils/file';
 
 export let deleteAllFlatOfferers = async (req: Request, res: Response) => {
     APILogger.logger.warn(`[DELETE] [/flatOfferers]`);
@@ -49,6 +50,16 @@ export let getFlatOfferer = async (
 
 export let addFlatOfferer = async (req: Request, res: Response, next: NextFunction) => {
     const user = await getUserByToken(req.header('Authorization'));
+    const promises = req.body.images.map(async image => {
+        const fileName = await saveImageToFile(image)
+        return fileName;
+    })
+    req.body.images = await Promise.all(promises)
+
+    req.body.rooms.forEach(async room => {
+        room.image = await saveImageToFile(room.image)
+    })
+
     const flat = new Flat(req.body);
     if (!user || !flat) {
         APILogger.logger.info(`Something went wrong.`);
@@ -61,9 +72,7 @@ export let addFlatOfferer = async (req: Request, res: Response, next: NextFuncti
     user.type = Type.OFFERER;
 
     try {
-        await user.save();
-        await flat.save();
-        await flatOfferer.save();
+        await Promise.all([user.save(), flat.save(), flatOfferer.save()]);
         console.log(`Offerer successfully saved for user with email: ${flatOfferer.user.email}`);
         return res.status(200).send();
     } catch (e) {
