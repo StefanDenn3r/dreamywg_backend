@@ -29,6 +29,7 @@ export default class Server {
         this.app = express();
         this.app.set("port", port);
         this.app.set("env", this.env);
+        this.app.use('/static', express.static('images'))
         this.app.use(bodyParser.json());
         this.app.use(bodyParser.urlencoded({extended: true}));
         this.applyLogger();
