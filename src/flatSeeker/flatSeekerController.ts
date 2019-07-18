@@ -6,6 +6,7 @@ import {APILogger} from "../utils/logger";
 import {Type} from "../utils/selectionEnums";
 import {FlatSeeker} from "./flatSeeker";
 import {matchOnDb} from "./flatSeekerService";
+import {saveImageToFile} from '../utils/file';
 
 export let searchFlats = async (req: Request, res: Response) => {
     try {
@@ -122,6 +123,7 @@ export let loadSearchProperties = async (req: Request, res: Response, next: Next
 
 export let addFlatSeeker = async (req: Request, res: Response, next: NextFunction) => {
     const user = await getUserByToken(req.header('Authorization'));
+    req.body.personalInformation.image = await saveImageToFile(req.body.personalInformation.image)
     const newSeeker = new FlatSeeker(req.body);
 
     if (!user || !newSeeker) {
