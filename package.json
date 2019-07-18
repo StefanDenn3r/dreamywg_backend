@@ -54,6 +54,7 @@
     "typescript": "^3.2.1"
   },
   "dependencies": {
+    "axios": "latest",
     "bcrypt": "^3.0.6",
     "body-parser": "^1.18.3",
     "chai-http": "^4.2.1",
@@ -66,20 +67,20 @@
     "halson": "^3.0.0",
     "helmet": "^3.16.0",
     "http": "0.0.0",
+    "https": "^1.0.0",
     "js2xmlparser": "^4.0.0",
     "jsonwebtoken": "^8.5.1",
+    "moment": "latest",
     "mongodb": "^3.2.7",
     "mongoose": "^4.1.9",
     "mongoose-extend-schema": "latest",
     "morgan": "^1.9.1",
     "nodemailer": "^6.2.1",
+    "oauth": "^0.9.15",
+    "query-string": "^6.8.1",
     "save": "^2.3.3",
     "tsc-watch": "^2.1.2",
-    "winston": "^3.2.1",
-    "query-string": "^6.8.1",
-    "https": "^1.0.0",
-    "oauth": "^0.9.15",
-    "axios": "latest",
-    "moment": "latest"
+    "uuid": "^3.3.2",
+    "winston": "^3.2.1"
   }
 }
