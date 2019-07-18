@@ -1,10 +1,9 @@
 import {NextFunction, Request, Response} from 'express'
+import {IUserModel, User} from "../users/user";
 import Schedule, { IScheduleModel } from './schedule';
 import { APILogger } from '../utils/logger';
 import { start } from 'repl';
 import moment = require("moment");
-import userController from '../users/userController'
-
 
 //TODO (Q) wait for flat offerer registration
 //TODO (Q) refactor logic to service class
@@ -132,11 +131,20 @@ export let getPastTimeslots = async (req: Request, res: Response, next: NextFunc
 };
 
 export let updatePastTimeslotStatus = async (req: Request, res: Response, next: NextFunction) => {
+    const token = req.header('Authorization');
+    console.log("token",token)
+
+    const user: IUserModel = await User.findOne({jwt_token: token});
+    if (!user) {
+        APILogger.logger.info(`[PATCH] user not found`);
+        return res.status(404).send()
+    }
 
     const timeslotId = req.params.id
     const newStatus = req.body.status
 
     const schedules = await Schedule.update({'timeslots._id': timeslotId}, {'$set': {
+        'timeslots.$.userId' : user._id,
         'timeslots.$.status': newStatus
     }})
 
