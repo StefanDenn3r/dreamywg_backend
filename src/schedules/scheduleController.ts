@@ -19,13 +19,11 @@ export let getSchedules = async (req: Request, res: Response, next: NextFunction
 
 export let getSchedule = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
-    console.log("getschedule")
     let schedule = await Schedule.findById(id).lean().catch((e) => {
         APILogger.logger.info(`[GET] [/schedules] something went wrong`);
         next(e)
         return null;
     })
-    console.log("schedule", schedule)
     return res.json(schedule);
 };
 
@@ -56,9 +54,6 @@ export let createSchedules = async (req: Request, res: Response, next: NextFunct
 
 export let createTimeslots = async (req: Request, res: Response, next: NextFunction) => {
     const scheduleId = req.params.id;
-    console.log("schedule Id", scheduleId)
-    console.log("starttime", req.query.startTime)
-    console.log("endtime ", req.query.endTime)
     const [startHour, startMinute] = req.query.startTime.split(':');
     const [endHour, endMinute] = req.query.endTime.split(':');
     const sessionTime = parseInt(req.query.sessionTime);
@@ -132,7 +127,6 @@ export let getPastTimeslots = async (req: Request, res: Response, next: NextFunc
 
 export let updatePastTimeslotStatus = async (req: Request, res: Response, next: NextFunction) => {
     const token = req.header('Authorization');
-    console.log("token",token)
 
     const user: IUserModel = await User.findOne({jwt_token: token});
     if (!user) {
