@@ -18,7 +18,6 @@ export let getFlats = async (req: Request, res: Response, next: NextFunction) =>
 };
 
 export let getFlat = async (req: Request, res: Response, next: NextFunction) => {
-    console.log("get flat is called");
     const id = req.params.id;
 
     APILogger.logger.info(`[GET] [/flats/] ${id}`);
