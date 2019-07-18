@@ -17,6 +17,16 @@ export let getSchedules = async (req: Request, res: Response, next: NextFunction
     return res.end(JSON.stringify(schedules));
 };
 
+export let getSchedulesByFlat = async (req: Request, res: Response, next: NextFunction) => {
+    let schedules = await Schedule.find({flatId: req.params.flatId}).lean().catch((e) => {
+        APILogger.logger.info(`[GET] [/schedules] something went wrong`);
+        next(e)
+        return null;
+    })
+
+    return res.end(JSON.stringify(schedules));
+};
+
 export let getSchedule = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
     let schedule = await Schedule.findById(id).lean().catch((e) => {
@@ -28,8 +38,10 @@ export let getSchedule = async (req: Request, res: Response, next: NextFunction)
 };
 
 export let createSchedules = async (req: Request, res: Response, next: NextFunction) => {
-    const startDate = new Date(req.query.startDate)
-    const endDate = new Date(req.query.endDate)
+    const startDate = new Date(req.body.startDate)
+    const endDate = new Date(req.body.endDate)
+    const flatId = req.body.flatId
+
     const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
     // TODO add validation
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
@@ -39,7 +51,7 @@ export let createSchedules = async (req: Request, res: Response, next: NextFunct
         scheduledDate.setDate(startDate.getDate() + index)
         schedules[index] = new Schedule({
             date: scheduledDate,
-            flatId: null
+            flatId: flatId
         }).save()
     }
 
@@ -48,15 +60,15 @@ export let createSchedules = async (req: Request, res: Response, next: NextFunct
         next(error)
         return null
     });
-
+    console.log(response)
     return res.end(JSON.stringify(response));
 }
 
 export let createTimeslots = async (req: Request, res: Response, next: NextFunction) => {
     const scheduleId = req.params.id;
-    const [startHour, startMinute] = req.query.startTime.split(':');
-    const [endHour, endMinute] = req.query.endTime.split(':');
-    const sessionTime = parseInt(req.query.sessionTime);
+    const [startHour, startMinute] = req.body.startTime.split(':');
+    const [endHour, endMinute] = req.body.endTime.split(':');
+    const sessionTime = parseInt(req.body.sessionTime);
     
     const schedule: IScheduleModel = await Schedule.findById(scheduleId).catch((e) => {
         console.error(e)
@@ -101,10 +113,11 @@ export let createTimeslots = async (req: Request, res: Response, next: NextFunct
 };
 
 export let getPastTimeslots = async (req: Request, res: Response, next: NextFunction) => {
-
-    var recentDate = new Date();
+    const flatId = req.params.flatId
+    const recentDate = new Date();
     const schedules = await Schedule.find({
-                        "timeslots.time": {$lt: recentDate}
+                        "flatId": flatId,
+                        "timeslots.endTime": {$lt: recentDate}
                     }).select("timeslots")
 
     // TODO join with user
@@ -113,14 +126,7 @@ export let getPastTimeslots = async (req: Request, res: Response, next: NextFunc
         timeslots = timeslots.concat(schedule.timeslots)
     })
 
-    // TODO find more efficient way
-    timeslots.forEach((timeslot) => {
-        const status = timeslot.status
-        if(status === "IDLE" || status === "BOOKED") {
-            const index = timeslots.indexOf(timeslot)
-            timeslots.splice(index, 1)
-        } 
-    })
+    timeslots = timeslots.filter(timeslot => timeslot.status !== "IDLE")
 
     return res.end(JSON.stringify(timeslots));
 };
@@ -136,11 +142,19 @@ export let updatePastTimeslotStatus = async (req: Request, res: Response, next: 
 
     const timeslotId = req.params.id
     const newStatus = req.body.status
-
-    const schedules = await Schedule.update({'timeslots._id': timeslotId}, {'$set': {
-        'timeslots.$.userId' : user._id,
-        'timeslots.$.status': newStatus
-    }})
+    let schedules = []
+    
+    if (newStatus == 'BOOKED') {
+        //only update user id when status is booked
+        schedules = await Schedule.update({'timeslots._id': timeslotId}, {'$set': {
+            'timeslots.$.userId' : user._id,
+            'timeslots.$.status': newStatus
+        }})
+    } else {
+        schedules = await Schedule.update({'timeslots._id': timeslotId}, {'$set': {
+            'timeslots.$.status': newStatus
+        }})
+    }
 
     return res.end(JSON.stringify(schedules));
 };
