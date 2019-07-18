@@ -39,7 +39,6 @@ export let getUser = async (req: Request, res: Response, next: NextFunction) => 
     return formatOutput(res, formatUser(user), 200, 'user')
 };
 
-
 export let addUser = async (req: Request, res: Response, next: NextFunction) => {
     const newUser = new User(req.body);
     try {
