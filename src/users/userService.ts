@@ -11,7 +11,7 @@ export let sendVerificationMail = async (user) => {
     await token.save();
 
     // Send email
-    const nodemailerOptions = config.get('nodemailer');
+    const nodemailerOptions:any = config.get('nodemailer');
     const transporter = nodemailer.createTransport(nodemailerOptions);
     const mailOptions = {
         from: nodemailerOptions.auth.user,
