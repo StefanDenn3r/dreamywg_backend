@@ -4,7 +4,6 @@ import {IUserModel, User} from "./user";
 import {Logger} from "../utils/logger";
 import axios from "axios";
 import * as querystring from "querystring";
-import {sendVerificationMail} from "../../dist/users/userService";
 import * as bcrypt from 'bcrypt'
 import {merge} from "lodash";
 import * as jwt from "jsonwebtoken";
@@ -139,7 +138,7 @@ export class UserService {
         try {
             user.password = bcrypt.hashSync(user.password, 10);
             await user.save();
-            await sendVerificationMail(user);
+            await UserService.sendVerificationMail(user);
         } catch (e) {
             Logger.logger.error(e);
             return null
@@ -181,7 +180,7 @@ export class UserService {
      * Private functions
      */
 
-    private sendVerificationMail = async (user) => {
+    private static sendVerificationMail = async (user) => {
 
         const token = await TokenService.createToken(user)
         if (!token)
