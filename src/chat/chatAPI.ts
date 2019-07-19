@@ -1,13 +1,9 @@
-import * as chatController from './chatController'
-
+import {ChatController} from "./chatController";
 
 export class ChatRoute {
     public static routes(app): void {
-        app.route('/chat/flat/:id').post(chatController.createChat)
-        app.route('/chat').get(chatController.retrieveChatList);
-        // app.route('/chatunit').get(chatController.retrieveChatUnit);
-        app.route('/chatunit').delete(chatController.deleteChat);
-        app.route('/initchat').post(chatController.initChatWithAllUsers);
-        app.route('/chat').delete(chatController.removeAllChat);
+        app.route('/chat/flat/:id').post(ChatController.createChat);
+        app.route('/chat').get(ChatController.retrieveChatList);
+        app.route('/chat').delete(ChatController.removeAllChat);
     }
 }

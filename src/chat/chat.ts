@@ -1,6 +1,6 @@
-import {Document, Model, model, Schema} from "mongoose";
+import {Document, Model, model, models, Schema} from "mongoose";
 
-interface MessageUnit {
+interface IChat {
     user1: {
         id: string
         fullName: string
@@ -17,11 +17,11 @@ interface MessageUnit {
 
 }
 
-export interface MessageUnitModel extends MessageUnit, Document {
+export interface IChatModel extends IChat, Document {
 
 }
 
-export const messageUnitSchema: Schema = new Schema({
+export const ChatSchema: Schema = new Schema({
     user1: {
         id: {type: String, required: true},
         fullName: {type: String, required: true}
@@ -37,8 +37,5 @@ export const messageUnitSchema: Schema = new Schema({
     }]
 }, {versionKey: false});
 
-
-const MessageUnit: Model<MessageUnitModel> = model<MessageUnitModel>("MessageUnit", messageUnitSchema);
-
-export default MessageUnit
+export const Chat: Model<IChatModel> = models.Chat || model<IChatModel>("Chat", ChatSchema);
 
