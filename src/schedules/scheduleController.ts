@@ -2,8 +2,7 @@ import {NextFunction, Request, Response} from 'express'
 import {IUserModel, User} from "../users/user";
 import Schedule, { IScheduleModel } from './schedule';
 import { APILogger } from '../utils/logger';
-import { start } from 'repl';
-import moment = require("moment");
+import * as scheduleService from './scheduleService'
 
 //TODO (Q) wait for flat offerer registration
 //TODO (Q) refactor logic to service class
@@ -42,25 +41,14 @@ export let createSchedules = async (req: Request, res: Response, next: NextFunct
     const endDate = new Date(req.body.endDate)
     const flatId = req.body.flatId
 
-    const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
-    // TODO add validation
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    const schedules = []
-    for (let index = 0; index <= diffDays; index++) {
-        const scheduledDate = new Date(startDate)
-        scheduledDate.setDate(startDate.getDate() + index)
-        schedules[index] = new Schedule({
-            date: scheduledDate,
-            flatId: flatId
-        }).save()
-    }
+    const schedules = scheduleService.createSchedule(startDate, endDate, flatId)
 
     const response = await Promise.all(schedules).catch(error => {
         APILogger.logger.error(`[POST] [/schedules] something went wrong when saving a new schedule | ${error.message}`);
         next(error)
         return null
     });
-    console.log(response)
+    
     return res.end(JSON.stringify(response));
 }
 
@@ -70,39 +58,14 @@ export let createTimeslots = async (req: Request, res: Response, next: NextFunct
     const [endHour, endMinute] = req.body.endTime.split(':');
     const sessionTime = parseInt(req.body.sessionTime);
     
-    const schedule: IScheduleModel = await Schedule.findById(scheduleId).catch((e) => {
+    let schedule: IScheduleModel = await Schedule.findById(scheduleId).catch((e) => {
         console.error(e)
         APILogger.logger.info(`[GET] [/schedules] something went wrong`);
         next(e)
         return null;
     })
 
-    //TODO validation
-    let timeslot = new Date(schedule.date)
-    timeslot.setHours(startHour)
-    timeslot.setMinutes(startMinute)
-
-    const endTimeslot = new Date(schedule.date)
-    endTimeslot.setHours(endHour)
-    endTimeslot.setMinutes(endMinute)
-
-    let startTime = timeslot
-
-    while (timeslot < endTimeslot) {
-        timeslot = moment(timeslot).add(sessionTime, 'minutes').toDate()
-        schedule.timeslots.push({
-            startTime: startTime,
-            endTime : timeslot,
-            userId: null
-        })
-        startTime = timeslot;
-    }
-
-    schedule.timeslots.push({
-        startTime: startTime,
-        endTime : moment(timeslot).add(sessionTime, 'minutes').toDate(),
-        userId: null
-    });
+    schedule = scheduleService.createTimeslots(schedule, startHour, startMinute, endHour, endMinute, sessionTime)
 
     const savedSchedule = await schedule.save().catch(error => {
         APILogger.logger.error(`[POST] [/schedules] something went wrong when saving a new timeslot | ${error.message}`);
@@ -120,13 +83,7 @@ export let getPastTimeslots = async (req: Request, res: Response, next: NextFunc
                         "timeslots.endTime": {$lt: recentDate}
                     }).select("timeslots")
 
-    // TODO join with user
-    let timeslots = []
-    schedules.forEach(schedule => {
-        timeslots = timeslots.concat(schedule.timeslots)
-    })
-
-    timeslots = timeslots.filter(timeslot => timeslot.status !== "IDLE")
+    const timeslots = scheduleService.getPastTimeslot(schedules)
 
     return res.end(JSON.stringify(timeslots));
 };
