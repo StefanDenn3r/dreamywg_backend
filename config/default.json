@@ -32,11 +32,13 @@
   },
   "linkedIn": {
     "clientId": "78guq2rtxaouam",
-    "clientSecret": "tWZPBjm8WgX9ngaH"
+    "clientSecret": "tWZPBjm8WgX9ngaH",
+    "handshakeUrl": "https://www.linkedin.com/oauth/v2/accessToken"
   },
   "facebook": {
     "clientId": "595941830904271",
-    "clientSecret": "c68a35d1246498371ce21c3277753016"
+    "clientSecret": "c68a35d1246498371ce21c3277753016",
+    "handshakeUrl": "https://graph.facebook.com/v3.3/oauth/access_token"
   },
   "morganFormat": "':remote-addr - :remote-user [:date[clf]] \":method :url HTTP/:http-version\" :status :res[content-length] \":referrer\" \":user-agent\""
 }
