@@ -2,9 +2,9 @@ import {NextFunction, Request, Response} from "express";
 import {User} from '../users/user'
 import {Logger} from "../utils/logger";
 import MessageUnit from "./messageUnit";
-import {getFlatOffererByFlatId} from "../flatOfferer/flatService";
 import {createNewChat, getChatUnit, retrieveChatlist} from "./chatService";
 import {UserService} from "../users/userService";
+import {FlatOffererService} from "../flatOfferer/flatOffererService";
 
 
 export let createChat = async (req: Request, res: Response, next: NextFunction) => {
@@ -13,7 +13,7 @@ export let createChat = async (req: Request, res: Response, next: NextFunction) 
 
     try {
         const currentUser = convertToMessageUser(await UserService.getUserByToken(token));
-        const flatOfferer = await getFlatOffererByFlatId(flatId);
+        const flatOfferer = await FlatOffererService.getFlatOffererByFlatId(flatId);
         const targetUser = convertToMessageUser(flatOfferer.user);
 
         const chatUnit = await getChatUnit(currentUser, targetUser);
