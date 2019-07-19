@@ -1,10 +1,10 @@
 import {NextFunction, Request, Response} from "express";
 import {User} from '../users/user'
-import {getUserByToken} from "../users/userService";
-import {APILogger} from "../utils/logger";
+import {Logger} from "../utils/logger";
 import MessageUnit from "./messageUnit";
 import {getFlatOffererByFlatId} from "../flatOfferer/flatService";
 import {createNewChat, getChatUnit, retrieveChatlist} from "./chatService";
+import {UserService} from "../users/userService";
 
 
 export let createChat = async (req: Request, res: Response, next: NextFunction) => {
@@ -12,7 +12,7 @@ export let createChat = async (req: Request, res: Response, next: NextFunction) 
     const token = req.header('Authorization');
 
     try {
-        const currentUser = convertToMessageUser(await getUserByToken(token));
+        const currentUser = convertToMessageUser(await UserService.getUserByToken(token));
         const flatOfferer = await getFlatOffererByFlatId(flatId);
         const targetUser = convertToMessageUser(flatOfferer.user);
 
@@ -48,7 +48,7 @@ export let retrieveChatList = async (req: Request, res: Response, next: NextFunc
 export let deleteChat = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.query._id;
 
-    APILogger.logger.warn(`[DELETE] [/users] ${id}`);
+    Logger.logger.warn(`[DELETE] [/users] ${id}`);
 
     await MessageUnit.findByIdAndDelete(id);
 
@@ -58,7 +58,7 @@ export let deleteChat = async (req: Request, res: Response, next: NextFunction) 
 
 export let initChatWithAllUsers = async (req: Request, res: Response, next: NextFunction) => {
     const token = req.header('Authorization');
-    const currentuser = await getUserByToken(token);
+    const currentuser = await UserService.getUserByToken(token);
     const users = await User.find();
     users.forEach(async user => {
         if (user._id.toString() !== currentuser._id.toString()) {

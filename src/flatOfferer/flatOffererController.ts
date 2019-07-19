@@ -1,14 +1,14 @@
 import {NextFunction, Request, Response} from "express";
 import {Flat} from "../flats/flat";
 import {formatOutput, formatUser} from "../utils";
-import {APILogger} from "../utils/logger";
+import {Logger} from "../utils/logger";
 import {Type} from "../utils/selectionEnums";
 import {FlatOfferer} from "./flatOfferer";
-import {getUserByToken} from "../users/userService";
 import {saveImageToFile} from '../utils/file';
+import {UserService} from "../users/userService";
 
 export let deleteAllFlatOfferers = async (req: Request, res: Response) => {
-    APILogger.logger.warn(`[DELETE] [/flatOfferers]`);
+    Logger.logger.warn(`[DELETE] [/flatOfferers]`);
 
     await FlatOfferer.remove({})
 
@@ -24,7 +24,7 @@ export let getFlatOfferers = async (
 ) => {
     const flatOfferer = await FlatOfferer.find();
     if (!flatOfferer) {
-        APILogger.logger.info(`[GET] [/flatofferers] something went wrong`);
+        Logger.logger.info(`[GET] [/flatofferers] something went wrong`);
         return res.status(404).send();
     }
 
@@ -38,18 +38,18 @@ export let getFlatOfferer = async (
 ) => {
     const id = req.params.id;
 
-    APILogger.logger.info(`[GET] [/flatofferer] ${id}`);
+    Logger.logger.info(`[GET] [/flatofferer] ${id}`);
 
     const flatOfferer = await FlatOfferer.findById(id);
     if (!flatOfferer) {
-        APILogger.logger.info(`[GET] [/flatofferer/:{id}] flatofferer with id ${id} not found`);
+        Logger.logger.info(`[GET] [/flatofferer/:{id}] flatofferer with id ${id} not found`);
         return res.status(404).send();
     }
     return formatOutput(res, formatUser(flatOfferer), 200, "flatOfferer");
 };
 
 export let addFlatOfferer = async (req: Request, res: Response, next: NextFunction) => {
-    const user = await getUserByToken(req.header('Authorization'));
+    const user = await UserService.getUserByToken(req.header('Authorization'));
     const promises = req.body.images.map(async image => {
         const fileName = await saveImageToFile(image)
         return fileName;
@@ -62,7 +62,7 @@ export let addFlatOfferer = async (req: Request, res: Response, next: NextFuncti
 
     const flat = new Flat(req.body);
     if (!user || !flat) {
-        APILogger.logger.info(`Something went wrong.`);
+        Logger.logger.info(`Something went wrong.`);
         return res.status(404).send();
     }
 
@@ -76,6 +76,6 @@ export let addFlatOfferer = async (req: Request, res: Response, next: NextFuncti
         console.log(`Offerer successfully saved for user with id ${user._id}`);
         return res.status(200).send();
     } catch (e) {
-        APILogger.logger.info(`Something went wrong. Error: ${e}`);
+        Logger.logger.info(`Something went wrong. Error: ${e}`);
     }
 };

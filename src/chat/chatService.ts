@@ -1,9 +1,9 @@
-import {getUserByToken} from "../users/userService";
+import {UserService} from "../users/userService";
 import MessageUnit from "./messageUnit";
-import {APILogger} from "../utils/logger";
+import {Logger} from "../utils/logger";
 
 export const retrieveChatlist = async (token) => {
-    const user = await getUserByToken(token);
+    const user = await UserService.getUserByToken(token);
     const messageList = await MessageUnit.find({$or: [{'user1.id': user._id.toString()}, {'user2.id': user._id.toString()}]}).sort({"messages.timestamp": 1});
 
     if (!messageList)
@@ -53,7 +53,7 @@ export let createNewChat = async (user1, user2) => {
     try {
         await newMessageUnit.save();
     } catch (err) {
-        APILogger.logger.error(`[POST] [/users] something went wrong when saving a new message # ${err.message}`);
+        Logger.logger.error(`[POST] [/users] something went wrong when saving a new message # ${err.message}`);
     }
 };
 

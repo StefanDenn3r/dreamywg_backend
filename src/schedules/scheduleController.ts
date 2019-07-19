@@ -1,7 +1,7 @@
 import {NextFunction, Request, Response} from 'express'
 import {IUserModel, User} from "../users/user";
 import Schedule, { IScheduleModel } from './schedule';
-import { APILogger } from '../utils/logger';
+import { Logger } from '../utils/logger';
 import { start } from 'repl';
 import moment = require("moment");
 
@@ -9,7 +9,7 @@ import moment = require("moment");
 //TODO (Q) refactor logic to service class
 export let getSchedules = async (req: Request, res: Response, next: NextFunction) => {
     let schedules = await Schedule.find().lean().catch((e) => {
-        APILogger.logger.info(`[GET] [/schedules] something went wrong`);
+        Logger.logger.info(`[GET] [/schedules] something went wrong`);
         next(e)
         return null;
     })
@@ -20,7 +20,7 @@ export let getSchedules = async (req: Request, res: Response, next: NextFunction
 export let getSchedule = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
     let schedule = await Schedule.findById(id).lean().catch((e) => {
-        APILogger.logger.info(`[GET] [/schedules] something went wrong`);
+        Logger.logger.info(`[GET] [/schedules] something went wrong`);
         next(e)
         return null;
     })
@@ -44,7 +44,7 @@ export let createSchedules = async (req: Request, res: Response, next: NextFunct
     }
 
     const response = await Promise.all(schedules).catch(error => {
-        APILogger.logger.error(`[POST] [/schedules] something went wrong when saving a new schedule | ${error.message}`);
+        Logger.logger.error(`[POST] [/schedules] something went wrong when saving a new schedule | ${error.message}`);
         next(error)
         return null
     });
@@ -60,7 +60,7 @@ export let createTimeslots = async (req: Request, res: Response, next: NextFunct
     
     const schedule: IScheduleModel = await Schedule.findById(scheduleId).catch((e) => {
         console.error(e)
-        APILogger.logger.info(`[GET] [/schedules] something went wrong`);
+        Logger.logger.info(`[GET] [/schedules] something went wrong`);
         next(e)
         return null;
     })
@@ -93,7 +93,7 @@ export let createTimeslots = async (req: Request, res: Response, next: NextFunct
     });
 
     const savedSchedule = await schedule.save().catch(error => {
-        APILogger.logger.error(`[POST] [/schedules] something went wrong when saving a new timeslot | ${error.message}`);
+        Logger.logger.error(`[POST] [/schedules] something went wrong when saving a new timeslot | ${error.message}`);
         next(error)
         return null
     })
@@ -130,7 +130,7 @@ export let updatePastTimeslotStatus = async (req: Request, res: Response, next: 
 
     const user: IUserModel = await User.findOne({jwt_token: token});
     if (!user) {
-        APILogger.logger.info(`[PATCH] user not found`);
+        Logger.logger.info(`[PATCH] user not found`);
         return res.status(404).send()
     }
 
