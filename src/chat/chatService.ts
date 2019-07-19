@@ -2,7 +2,6 @@ import {UserService} from "../users/userService";
 import {Logger} from "../utils/logger";
 import {Chat} from "./chat";
 import {FlatOffererService} from "../flatOfferer/flatOffererService";
-import {createNewChat} from "../../dist/chat/chatController";
 
 export class ChatService {
     static retrieveChatList = async (token) => {
@@ -73,7 +72,7 @@ export class ChatService {
         const chat = await ChatService.getChat(currentMessageUser, targetMessageUser);
 
         if (!chat)
-            await createNewChat(currentMessageUser, targetMessageUser);
+            await ChatService.createChat(currentMessageUser, targetMessageUser);
 
         const chats = await ChatService.retrieveChatList(token);
 
@@ -91,14 +90,14 @@ export class ChatService {
     };
 
     private static createChat = async (user1, user2) => {
-        const Chat = new Chat({
+        const chat = new Chat({
             user1: user1,
             user2: user2,
             messages: []
         });
 
         try {
-            await Chat.save();
+            await chat.save();
         } catch (e) {
             Logger.logger.error(e);
             return null
