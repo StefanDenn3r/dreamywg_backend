@@ -4,12 +4,21 @@ import Schedule, { IScheduleModel } from './schedule';
 import { Logger } from '../utils/logger';
 import { start } from 'repl';
 import moment = require("moment");
+import * as scheduleService from './scheduleService'
 
-//TODO (Q) wait for flat offerer registration
-//TODO (Q) refactor logic to service class
 export let getSchedules = async (req: Request, res: Response, next: NextFunction) => {
     let schedules = await Schedule.find().lean().catch((e) => {
         Logger.logger.info(`[GET] [/schedules] something went wrong`);
+        next(e)
+        return null;
+    })
+
+    return res.end(JSON.stringify(schedules));
+};
+
+export let getSchedulesByFlat = async (req: Request, res: Response, next: NextFunction) => {
+    let schedules = await Schedule.find({flatId: req.params.flatId}).lean().catch((e) => {
+        APILogger.logger.info(`[GET] [/schedules] something went wrong`);
         next(e)
         return null;
     })
@@ -28,20 +37,11 @@ export let getSchedule = async (req: Request, res: Response, next: NextFunction)
 };
 
 export let createSchedules = async (req: Request, res: Response, next: NextFunction) => {
-    const startDate = new Date(req.query.startDate)
-    const endDate = new Date(req.query.endDate)
-    const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
-    // TODO add validation
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    const schedules = []
-    for (let index = 0; index <= diffDays; index++) {
-        const scheduledDate = new Date(startDate)
-        scheduledDate.setDate(startDate.getDate() + index)
-        schedules[index] = new Schedule({
-            date: scheduledDate,
-            flatId: null
-        }).save()
-    }
+    const startDate = new Date(req.body.startDate)
+    const endDate = new Date(req.body.endDate)
+    const flatId = req.body.flatId
+
+    const schedules = scheduleService.createSchedule(startDate, endDate, flatId)
 
     const response = await Promise.all(schedules).catch(error => {
         Logger.logger.error(`[POST] [/schedules] something went wrong when saving a new schedule | ${error.message}`);
@@ -54,43 +54,18 @@ export let createSchedules = async (req: Request, res: Response, next: NextFunct
 
 export let createTimeslots = async (req: Request, res: Response, next: NextFunction) => {
     const scheduleId = req.params.id;
-    const [startHour, startMinute] = req.query.startTime.split(':');
-    const [endHour, endMinute] = req.query.endTime.split(':');
-    const sessionTime = parseInt(req.query.sessionTime);
+    const [startHour, startMinute] = req.body.startTime.split(':');
+    const [endHour, endMinute] = req.body.endTime.split(':');
+    const sessionTime = parseInt(req.body.sessionTime);
     
-    const schedule: IScheduleModel = await Schedule.findById(scheduleId).catch((e) => {
+    let schedule: IScheduleModel = await Schedule.findById(scheduleId).catch((e) => {
         console.error(e)
         Logger.logger.info(`[GET] [/schedules] something went wrong`);
         next(e)
         return null;
     })
 
-    //TODO validation
-    let timeslot = new Date(schedule.date)
-    timeslot.setHours(startHour)
-    timeslot.setMinutes(startMinute)
-
-    const endTimeslot = new Date(schedule.date)
-    endTimeslot.setHours(endHour)
-    endTimeslot.setMinutes(endMinute)
-
-    let startTime = timeslot
-
-    while (timeslot < endTimeslot) {
-        timeslot = moment(timeslot).add(sessionTime, 'minutes').toDate()
-        schedule.timeslots.push({
-            startTime: startTime,
-            endTime : timeslot,
-            userId: null
-        })
-        startTime = timeslot;
-    }
-
-    schedule.timeslots.push({
-        startTime: startTime,
-        endTime : moment(timeslot).add(sessionTime, 'minutes').toDate(),
-        userId: null
-    });
+    schedule = scheduleService.createTimeslots(schedule, startHour, startMinute, endHour, endMinute, sessionTime)
 
     const savedSchedule = await schedule.save().catch(error => {
         Logger.logger.error(`[POST] [/schedules] something went wrong when saving a new timeslot | ${error.message}`);
@@ -101,26 +76,14 @@ export let createTimeslots = async (req: Request, res: Response, next: NextFunct
 };
 
 export let getPastTimeslots = async (req: Request, res: Response, next: NextFunction) => {
-
-    var recentDate = new Date();
+    const flatId = req.params.flatId
+    const recentDate = new Date();
     const schedules = await Schedule.find({
-                        "timeslots.time": {$lt: recentDate}
+                        "flatId": flatId,
+                        "timeslots.endTime": {$lt: recentDate}
                     }).select("timeslots")
 
-    // TODO join with user
-    let timeslots = []
-    schedules.forEach(schedule => {
-        timeslots = timeslots.concat(schedule.timeslots)
-    })
-
-    // TODO find more efficient way
-    timeslots.forEach((timeslot) => {
-        const status = timeslot.status
-        if(status === "IDLE" || status === "BOOKED") {
-            const index = timeslots.indexOf(timeslot)
-            timeslots.splice(index, 1)
-        } 
-    })
+    const timeslots = scheduleService.getPastTimeslot(schedules)
 
     return res.end(JSON.stringify(timeslots));
 };
@@ -136,11 +99,19 @@ export let updatePastTimeslotStatus = async (req: Request, res: Response, next: 
 
     const timeslotId = req.params.id
     const newStatus = req.body.status
+    let schedules = []
 
-    const schedules = await Schedule.update({'timeslots._id': timeslotId}, {'$set': {
-        'timeslots.$.userId' : user._id,
-        'timeslots.$.status': newStatus
-    }})
+    if (newStatus == 'BOOKED') {
+        //only update user id when status is booked
+        schedules = await Schedule.update({'timeslots._id': timeslotId}, {'$set': {
+            'timeslots.$.userId' : user._id,
+            'timeslots.$.status': newStatus
+        }})
+    } else {
+        schedules = await Schedule.update({'timeslots._id': timeslotId}, {'$set': {
+            'timeslots.$.status': newStatus
+        }})
+    }
 
     return res.end(JSON.stringify(schedules));
 };
