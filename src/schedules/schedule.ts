@@ -1,14 +1,11 @@
 import {Document, Model, model, Schema} from "mongoose";
 
-//TODO (Q) wait for flat offerer registration
 interface ISchedule {
     date: Date;
     timeslots: ITimeSlot[];
     flatId: string;
-
 }
 
-// TODO (Q) how should I use this?
 export interface ITimeSlot {
     startTime: Date;
     endTime: Date;
