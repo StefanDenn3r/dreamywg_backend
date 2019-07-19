@@ -10,5 +10,6 @@ export class ScheduleRoute {
         app.route('/schedules').delete(scheduleController.deleteAllSchedule);
         app.route('/timeslots/:flatId/past').get(scheduleController.getPastTimeslots);
         app.route('/timeslots/:id').put(scheduleController.updatePastTimeslotStatus);
+        app.route('/timeslots/:id/cancel').put(scheduleController.cancelTimeslot);
     }
 }
