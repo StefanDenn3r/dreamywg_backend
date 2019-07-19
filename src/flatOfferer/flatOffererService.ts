@@ -43,20 +43,6 @@ export class FlatOffererService {
         if (!user)
             return null;
 
-        const promises = body.images.map(async image => {
-            return await saveImageToFile(image);
-        });
-        try {
-            body.images = await Promise.all(promises);
-
-            body.rooms.forEach(async room => {
-                room.image = await saveImageToFile(room.image)
-            })
-        } catch (e) {
-            Logger.logger.error(e);
-            return null
-        }
-
         const flat = new Flat(body);
 
         const flatOfferer = new FlatOfferer();

@@ -1,5 +1,6 @@
 import {NextFunction, Request, Response} from "express";
 import {FlatOffererService} from "./flatOffererService";
+import {saveImageToFile} from "../utils/file";
 
 export class FlatOffererController {
 
@@ -36,7 +37,15 @@ export class FlatOffererController {
 
     static createFlatOfferer = async (req: Request, res: Response, next: NextFunction) => {
         const token = req.header('Authorization');
+        const promises = req.body.images.map(async image => {
+            return await saveImageToFile(image);
+        });
 
+        req.body.images = await Promise.all(promises);
+
+        req.body.rooms.forEach(async room => {
+            room.image = await saveImageToFile(room.image)
+        });
 
         const result = await FlatOffererService.createFlatOfferer(token, req.body);
 
