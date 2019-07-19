@@ -4,8 +4,6 @@ import Schedule, { IScheduleModel } from './schedule';
 import { APILogger } from '../utils/logger';
 import * as scheduleService from './scheduleService'
 
-//TODO (Q) wait for flat offerer registration
-//TODO (Q) refactor logic to service class
 export let getSchedules = async (req: Request, res: Response, next: NextFunction) => {
     let schedules = await Schedule.find().lean().catch((e) => {
         APILogger.logger.info(`[GET] [/schedules] something went wrong`);
