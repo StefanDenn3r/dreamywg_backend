@@ -1,8 +1,8 @@
 import {NextFunction, Request, Response} from 'express'
 import {IUserModel, User} from "../users/user";
-import Schedule, {IScheduleModel} from './schedule';
 import {Logger} from '../utils/logger';
 import * as scheduleService from './scheduleService'
+import {IScheduleModel, Schedule} from "./schedule";
 
 export let getSchedules = async (req: Request, res: Response, next: NextFunction) => {
     let schedules = await Schedule.find().lean().catch((e) => {
@@ -124,7 +124,7 @@ export let cancelTimeslot = async (req: Request, res: Response, next: NextFuncti
 
     const user: IUserModel = await User.findOne({jwt_token: token});
     if (!user) {
-        APILogger.logger.info(`[PATCH] user not found`);
+        Logger.logger.info(`[PATCH] user not found`);
         return res.status(404).send()
     }
 
