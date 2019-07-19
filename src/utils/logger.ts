@@ -20,7 +20,7 @@ export class Logger {
                 ),
             }),
             new transports.Console({
-                level: 'info',
+                level: 'error',
                 handleExceptions: true,
                 format: combine(
                     label({label: 'api errors'}),
