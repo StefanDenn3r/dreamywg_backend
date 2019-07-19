@@ -7,7 +7,6 @@ import {
     occupation,
     rentType
 } from "../utils/selectionEnums";
-
 //not sure if this is a good thing
 import {convertAddressToCoordinate} from '../utils/locationUtil'
 
@@ -81,6 +80,7 @@ export interface IFlat {
 
 export interface IFlatModel extends IFlat, Document {
     getFullAddress();
+
     getCoordinate();
 }
 
