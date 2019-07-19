@@ -95,11 +95,11 @@ export let updatePastTimeslotStatus = async (req: Request, res: Response, next: 
         return res.status(404).send()
     }
 
-    const timeslotId = req.params.id;
-    const newStatus = req.body.status;
-    let schedules = [];
-
-    if (newStatus == 'BOOKED') {
+    const timeslotId = req.params.id
+    const newStatus = req.body.status
+    let schedules = []
+    
+    if (newStatus == 'BOOKED') { // TODO should use enum
         //only update user id when status is booked
         schedules = await Schedule.update({'timeslots._id': timeslotId}, {
             '$set': {
@@ -117,6 +117,24 @@ export let updatePastTimeslotStatus = async (req: Request, res: Response, next: 
 
     return res.end(JSON.stringify(schedules));
 };
+
+export let cancelTimeslot = async (req: Request, res: Response, next: NextFunction) => {
+    const token = req.header('Authorization');
+    const timeslotId = req.params.id
+
+    const user: IUserModel = await User.findOne({jwt_token: token});
+    if (!user) {
+        APILogger.logger.info(`[PATCH] user not found`);
+        return res.status(404).send()
+    }
+
+    const schedules = await Schedule.update({'timeslots._id': timeslotId}, {'$set': {
+        'timeslots.$.userId' : null,
+        'timeslots.$.status': 'IDLE' // TODO should use enum
+    }})
+
+    return res.end(JSON.stringify(schedules));
+}
 
 export let deleteAllSchedule = async (req: Request, res: Response, next: NextFunction) => {
     await Schedule.deleteMany({});
