@@ -1,4 +1,4 @@
-import {Document, Model, model, Schema} from "mongoose";
+import {Document, Model, model, models, Schema} from "mongoose";
 
 interface ISchedule {
     date: Date;
@@ -18,11 +18,11 @@ export interface IScheduleModel extends ISchedule, Document {
 }
 
 enum InterviewStatus {
-    IDLE="IDLE", // if no user book the time slot
-    BOOKED="BOOKED", // if there's a user book the time slot
-    ACCEPTED= "ACCEPTED", // user is accepted
-    REJECTED= "REJECTED", // user is rejected
-    NO_SHOW= "NO_SHOW" // user is not coming to interview
+    IDLE = "IDLE", // if no user book the time slot
+    BOOKED = "BOOKED", // if there's a user book the time slot
+    ACCEPTED = "ACCEPTED", // user is accepted
+    REJECTED = "REJECTED", // user is rejected
+    NO_SHOW = "NO_SHOW" // user is not coming to interview
 }
 
 export var TimeSlotSchema: Schema = new Schema({
@@ -43,7 +43,7 @@ export var TimeSlotSchema: Schema = new Schema({
         ref: 'User'
     },
     status: {
-        type: String, 
+        type: String,
         enum: this.InterviewStatus,
         default: InterviewStatus.IDLE
     }
@@ -70,5 +70,4 @@ export var ScheduleSchema: Schema = new Schema({
     usePushEach: true
 });
 
-const Schedule: Model<IScheduleModel> = model<IScheduleModel>("Schedule", ScheduleSchema);
-export default Schedule
+export const Schedule: Model<IScheduleModel> = models.Schedule || model<IScheduleModel>("Schedule", ScheduleSchema);

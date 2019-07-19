@@ -4,7 +4,7 @@ import * as mongoose from "mongoose";
 import * as socketIo from 'socket.io';
 import {Logger} from "./utils/logger";
 import * as config from "config";
-import {updateChatUnit} from "./chat/chatService";
+import {ChatService} from "./chat/chatService";
 
 export class ChatServer {
     public static readonly PORT: number = 8080;
@@ -66,12 +66,11 @@ export class ChatServer {
     }
 
     private storeClientInfo(data) {
-        console.log(this.socket.id);
         this.clients[data.userId] = this.socket.id
     }
 
     private async message(message) {
-        console.log('[server](message): %s', JSON.stringify(message));
+        Logger.logger.info('[server](message): %s', JSON.stringify(message));
 
         const user1 = message.user1;
         const user2 = message.user2;
@@ -83,7 +82,7 @@ export class ChatServer {
             this.io.to(receiverSocketId).emit('reply', message);
         }
 
-        await updateChatUnit(user1, user2, message.senderId, message.content, message.timestamp);
+        await ChatService.updateChatUnit(user1, user2, message.senderId, message.content, message.timestamp);
     }
 
     private async mongoSetup() {
