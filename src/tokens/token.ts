@@ -1,4 +1,4 @@
-import {Document, Model, model, Schema} from "mongoose";
+import {Document, Model, model, models, Schema} from "mongoose";
 
 
 interface IToken {
@@ -17,5 +17,4 @@ export const tokenSchema: Schema = new Schema({
 }, {versionKey: false});
 
 
-const Token: Model<ITokenModel> = model<ITokenModel>("Token", tokenSchema);
-export default Token
+export const Token: Model<ITokenModel> = models.Token || model<ITokenModel>("Token", tokenSchema);

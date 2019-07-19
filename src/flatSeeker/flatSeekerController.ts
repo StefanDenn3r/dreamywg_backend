@@ -1,16 +1,16 @@
 import {NextFunction, Request, Response} from "express";
 import {mergeWith, isArray} from "lodash";
-import {getUserByToken} from "../users/userService";
 import {formatOutput, formatUser} from "../utils";
-import {APILogger} from "../utils/logger";
+import {Logger} from "../utils/logger";
 import {Type} from "../utils/selectionEnums";
 import {FlatSeeker} from "./flatSeeker";
 import {matchOnDb} from "./flatSeekerService";
 import {saveImageToFile} from '../utils/file';
+import {UserService} from "../users/userService";
 
 export let searchFlats = async (req: Request, res: Response) => {
     try {
-        const user = await getUserByToken(req.header('Authorization'));
+        const user = await UserService.getUserByToken(req.header('Authorization'));
         let flatSeeker = await FlatSeeker.findOne({user: user}).populate('user');
 
         const body = req.body;
@@ -50,7 +50,7 @@ export let searchFlats = async (req: Request, res: Response) => {
 
 
 export let deleteAllFlatSeekers = async (req: Request, res: Response) => {
-    APILogger.logger.warn(`[DELETE] [/flatSeekers]`);
+    Logger.logger.warn(`[DELETE] [/flatSeekers]`);
 
     await FlatSeeker.remove({});
 
@@ -62,7 +62,7 @@ export let deleteAllFlatSeekers = async (req: Request, res: Response) => {
 export let getFlatSeekers = async (req: Request, res: Response) => {
     const flatOfferer = await FlatSeeker.find();
     if (!flatOfferer) {
-        APILogger.logger.info(`[GET] [/flatseekers] something went wrong`);
+        Logger.logger.info(`[GET] [/flatseekers] something went wrong`);
         return res.status(404).send();
     }
 
@@ -72,11 +72,11 @@ export let getFlatSeekers = async (req: Request, res: Response) => {
 export let getFlatSeeker = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
 
-    APILogger.logger.info(`[GET] [/flatseekers] ${id}`);
+    Logger.logger.info(`[GET] [/flatseekers] ${id}`);
 
     const flatofferer = await FlatSeeker.findById(id);
     if (!flatofferer) {
-        APILogger.logger.info(
+        Logger.logger.info(
             `[GET] [/flatseekers/:{id}] flatseekers with id ${id} not found`
         );
         return res.status(404).send();
@@ -86,7 +86,7 @@ export let getFlatSeeker = async (req: Request, res: Response, next: NextFunctio
 
 export let loadSearchProperties = async (req: Request, res: Response, next: NextFunction) => {
     const token = req.header('Authorization');
-    const user = await getUserByToken(token);
+    const user = await UserService.getUserByToken(token);
     const flatSeeker = await FlatSeeker.findOne({user: user});
 
     const result = {
@@ -122,12 +122,12 @@ export let loadSearchProperties = async (req: Request, res: Response, next: Next
 };
 
 export let addFlatSeeker = async (req: Request, res: Response, next: NextFunction) => {
-    const user = await getUserByToken(req.header('Authorization'));
+    const user = await UserService.getUserByToken(req.header('Authorization'));
     req.body.personalInformation.image = await saveImageToFile(req.body.personalInformation.image)
     const newSeeker = new FlatSeeker(req.body);
 
     if (!user || !newSeeker) {
-        APILogger.logger.info(`Something went wrong.`);
+        Logger.logger.info(`Something went wrong.`);
         return res.status(404).send();
     }
 
@@ -139,6 +139,6 @@ export let addFlatSeeker = async (req: Request, res: Response, next: NextFunctio
         console.log(`Seeker successfully saved for user with email: ${newSeeker.user.email}`);
         return res.status(200).send();
     } catch (e) {
-        APILogger.logger.info(`Something went wrong. Error: ${e}`);
+        Logger.logger.info(`Something went wrong. Error: ${e}`);
     }
 };

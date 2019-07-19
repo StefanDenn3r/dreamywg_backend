@@ -2,7 +2,7 @@ import {createServer, Server} from 'http';
 import * as express from 'express';
 import * as mongoose from "mongoose";
 import * as socketIo from 'socket.io';
-import {APILogger} from "./utils/logger";
+import {Logger} from "./utils/logger";
 import * as config from "config";
 import {updateChatUnit} from "./chat/chatService";
 
@@ -89,11 +89,11 @@ export class ChatServer {
     private async mongoSetup() {
         try {
             await mongoose.connect(this.mongoUrl, {socketOptions: config.get("mongo.config")});
-            APILogger.logger.info(
+            Logger.logger.info(
                 `Connection to MongoDB at ${this.mongoUrl} established`
             );
         } catch (err) {
-            APILogger.logger.error(
+            Logger.logger.error(
                 `Connection to MONGO DB failed : ${err} - Shutting down Server`
             );
         }

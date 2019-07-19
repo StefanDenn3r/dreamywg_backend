@@ -7,7 +7,7 @@ import * as helmet from "helmet";
 import * as mongoose from "mongoose";
 import * as morgan from "morgan";
 import * as errorHandler from "./utils/errorHandler";
-import {APILogger, WinstonStream} from "./utils/logger";
+import {Logger, WinstonStream} from "./utils/logger";
 
 
 import {FlatOffererRoute} from "./flatOfferer/flatOffererAPI";
@@ -43,14 +43,14 @@ export default class Server {
     private async start() {
         await this.mongoSetup();
         this.app.listen(this.app.get("port"), () => {
-            APILogger.logger.info(
+            Logger.logger.info(
                 `Server [${config.get(
                     "name"
                 )}] is running at http://localhost:${this.app.get(
                     "port"
                 )} in ${this.app.get("env")} Mode`
             );
-            APILogger.logger.info("Press CTRL-C to stop");
+            Logger.logger.info("Press CTRL-C to stop");
         });
     }
 
@@ -67,7 +67,7 @@ export default class Server {
         this.app.use(errorHandler.logging);
         this.app.use(errorHandler.clientErrorHandler);
         this.app.use(errorHandler.errorHandler);
-        APILogger.logger.info(
+        Logger.logger.info(
             "Applied middleware: [HELMET][CORS][COMPRESSION][LOGGING][ERROR HANDLER]"
         );
     }
@@ -93,11 +93,11 @@ export default class Server {
     private async mongoSetup() {
         try {
             await mongoose.connect(this.mongoUrl, {socketOptions: config.get("mongo.config")});
-            APILogger.logger.info(
+            Logger.logger.info(
                 `Connection to MongoDB at ${this.mongoUrl} established`
             );
         } catch (err) {
-            APILogger.logger.error(
+            Logger.logger.error(
                 `Connection to MONGO DB failed : ${err} - Shutting down Server`
             );
         }
