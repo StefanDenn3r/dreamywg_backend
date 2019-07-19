@@ -137,8 +137,9 @@ export class UserService {
     static async createUser(user) {
         try {
             user.password = bcrypt.hashSync(user.password, 10);
-            await user.save();
+            const newUser = await user.save();
             await UserService.sendVerificationMail(user);
+            return newUser
         } catch (e) {
             Logger.logger.error(e);
             return null

@@ -17,7 +17,7 @@ export class TokenService {
         const token = new Token({_userId: user._id, token: crypto.randomBytes(16).toString('hex')});
 
         try {
-            await token.save();
+            return await token.save();
         } catch (e) {
             Logger.logger.error(e);
             return null

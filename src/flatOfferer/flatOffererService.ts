@@ -2,7 +2,6 @@ import {FlatOfferer} from "./flatOfferer";
 import {Flat} from "../flats/flat";
 import {Logger} from "../utils/logger";
 import {UserService} from "../users/userService";
-import {saveImageToFile} from "../utils/file";
 import {Type} from "../utils/selectionEnums";
 import {FlatService} from "../flats/flatService";
 
@@ -59,7 +58,7 @@ export class FlatOffererService {
     }
 
     static getFlatOffererByFlatId = async (id) => {
-        const flat = FlatService.getFlatById(id);
+        const flat = await FlatService.getFlatById(id);
         if (!flat)
             return null;
 

@@ -7,7 +7,7 @@ export class ChatController {
         const token = req.header('Authorization');
         const flatId = req.params.id;
 
-        const chats = ChatService.createChatByTokenAndFlatId(token, flatId);
+        const chats = await ChatService.createChatByTokenAndFlatId(token, flatId);
 
         if (!chats)
             return res.status(400).send();
@@ -18,7 +18,6 @@ export class ChatController {
 
     static retrieveChatList = async (req: Request, res: Response, next: NextFunction) => {
         const token = req.header('Authorization');
-
 
         const chats = await ChatService.retrieveChatList(token);
         if (!chats)

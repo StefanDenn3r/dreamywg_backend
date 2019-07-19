@@ -89,7 +89,7 @@ export class SearchService {
             const currentFlat = hardCriteriaFilteredFlats[i];
             result.push({
                 id: currentFlat.id,
-                img: [], // todo: currentFlat.rooms[0].images[0],
+                img: currentFlat.images[0],
                 title: currentFlat.title,
                 description: currentFlat.shortDescription,
                 matched: matchedScores[i],

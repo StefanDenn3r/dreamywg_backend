@@ -80,7 +80,7 @@ export class FlatSeekerController {
         else
             flatSeeker.preferences.flat.room.dateAvailable = undefined;
 
-        const result = SearchService.searchFlats(flatSeeker, page, elementsPerPage);
+        const result = await SearchService.searchFlats(flatSeeker, page, elementsPerPage);
         if (!result)
             return res.status(400).send();
         else {
