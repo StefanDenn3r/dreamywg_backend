@@ -10,7 +10,6 @@ export interface IUser {
     phoneNumber: string;
     gender: Gender;
     dateOfBirth: Date;
-    residenceId?: string;
     isVerifiedByMail: boolean;
     isVerifiedBySocialMedia: boolean;
     accessTokenFacebook: String,
