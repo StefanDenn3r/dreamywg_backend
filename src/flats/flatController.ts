@@ -66,22 +66,6 @@ export let deleteAllFlats = async (req: Request, res: Response) => {
     return res.status(204).send();
 };
 
-
-export let getFlatResidents = async (req: Request, res: Response, next: NextFunction) => {
-    const id = req.params.id;
-
-    try {
-        const users = await User.find({residenceId: id});
-        // TODO (Q) join with preferences
-        return formatOutput(res, users.map(formatUser), 200, 'residents')
-    } catch (e) {
-        console.error(e)
-        // TODO set error logger
-        APILogger.logger.info(`Exception when getting residents with flat id ${id}`);
-        return res.status(404).send()
-    }
-};
-
 export const generateFlats =async (req: Request, res: Response) => {
     try {
         await createMockFlats(5);
