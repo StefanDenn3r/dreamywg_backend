@@ -32,8 +32,8 @@ export default class Server {
         this.app.set("port", port);
         this.app.set("env", this.env);
         this.app.use('/static', express.static('images'))
-        this.app.use(bodyParser.json());
-        this.app.use(bodyParser.urlencoded({extended: true}));
+        this.app.use(bodyParser.json({limit: '10mb'}));
+        this.app.use(bodyParser.urlencoded({limit: '10mb', extended: true}));
         this.applyLogger();
         this.applyRoutes();
         this.applyMiddleWare();
