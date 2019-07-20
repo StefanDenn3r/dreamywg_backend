@@ -3,7 +3,6 @@ import {NextFunction, Request, Response} from 'express'
 import {User} from './user'
 import {UserService} from "./userService";
 
-// TODO add Logging and Unauthorized
 export class UserController {
 
     static loginUrl = `http://${config.get('host')}:${config.get('frontend_port')}/login`;

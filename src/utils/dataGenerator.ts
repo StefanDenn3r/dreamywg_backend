@@ -1439,7 +1439,7 @@ const generateFlat:any = (index) => {
         flatSize: (index % 150) + 10,
         stations: generateRandomListOfType(index, stations),
         stores: generateRandomListOfType(index, stores),
-        flatshareType: getValueForSelection(3, flatshareType), // todo: change
+        flatshareType: getValueForSelection(3, flatshareType),
         genderRestriction: genderRestrictions.None, // getValueForSelection(index, genderRestriction),
         flatEquipment: {
             parkingLot: getRandomBoolean(),
