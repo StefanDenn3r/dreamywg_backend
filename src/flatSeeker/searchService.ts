@@ -50,7 +50,7 @@ export class SearchService {
                     .sort({'rooms[0].roomSize': -1, 'rooms[0].rent': 1})
             );
             const filteredFlats = dbFilteredFlats
-                .filter(flat => flat.flatmatePreferences.gender === flatSeeker.user.gender)
+                .filter(flat => SearchService.NonUndefined(flat.flatmatePreferences.gender, flat.flatmatePreferences.gender === flatSeeker.user.gender))
                 .filter(flat => SearchService.NonUndefined(preferences.flat.room.dateAvailable, preferences.flat.room.dateAvailable <= flat.rooms[0].dateAvailable))
                 .filter(flat => flat.flatmates.every(flatmate => SearchService.inBetween(preferences.flatmates.age, flatmate.age)))
                 .filter(flat => {
@@ -163,7 +163,9 @@ export class SearchService {
     };
 
     private static calculateFlatshareActivityScore = (flatActivities, seekerActivties) => {
-        return seekerActivties.map(activity => +(flatActivities.contains(activity))).reduce((a, b) => a + b) / seekerActivties.length
+        if (seekerActivties.length > 0)
+            return seekerActivties.map(activity => +(flatActivities.contains(activity))).reduce((a, b) => a + b) / seekerActivties.length
+        else return 1
     };
 }
 
