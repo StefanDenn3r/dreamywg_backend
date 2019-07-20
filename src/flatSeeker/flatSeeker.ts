@@ -9,13 +9,13 @@ interface IFlatSeeker {
     user: IUser,
     personalInformation: {
         occupation: occupation,
-        field: String,
+        field?: String,
         flatshareExperience: FlatshareExperience,
-        languages: Array<String>,
-        practiceOfAbstaining: Array<String>,
-        hobbies: Array<String>,
+        languages?: Array<String>,
+        practiceOfAbstaining?: Array<String>,
+        hobbies?: Array<String>,
         age: Number,
-        socialMedia: String
+        socialMedia?: String
         description: String,
         smoker: Boolean,
         pets: Boolean,
@@ -25,8 +25,8 @@ interface IFlatSeeker {
     preferences: {
         flat: {
             regions: Array<String>,
-            stations: Array<String>,
-            stores: Array<String>,
+            stations?: Array<String>,
+            stores?: Array<String>,
             flatshareType: flatshareType,
             room: {
                 size: {
@@ -82,36 +82,36 @@ export interface IFlatSeekerModel extends IFlatSeeker, Document {
 export const FlatSeekerSchema = new Schema({
     user: {type: Schema.Types.ObjectId, ref: 'User'},
     personalInformation: {
-        occupation: {type: String, enum: this.occupation},
+        occupation: {type: String, enum: this.occupation, required: true},
         field: String,
-        flatshareExperience: {type: String, enum: this.FlatshareExperience},
+        flatshareExperience: {type: String, enum: this.FlatshareExperience, required: true},
         languages: [String],
         practiceOfAbstaining: [String],
         hobbies: [String],
-        age: Number,
+        age: {type: Number, required: true},
         socialMedia: String,
-        description: String,
+        description: {type: String, required: true},
         smoker: {type: Boolean, default: false},
         pets: {type: Boolean, default: false},
         weekendAbsent: {type: Boolean, default: false},
-        image:{data: Buffer, contentType: String}
+        image: {data: Buffer, contentType: String}
     },
     preferences: {
         flat: {
-            regions: [String],
+            regions: {type: [String], required: true},
             stations: [String],
             stores: [String],
-            flatshareType: {type: String, enum: this.flatshareType},
+            flatshareType: {type: String, enum: this.flatshareType, required: true},
             room: {
                 size: {
-                    from: Number,
-                    to: Number,
+                    from: {type: Number, required: true},
+                    to: {type: Number, required: true},
                 },
                 rent: {
-                    from: Number,
-                    to: Number,
+                    from: {type: Number, required: true},
+                    to: {type: Number, required: true},
                 },
-                rentType: {type: String, enum: this.rentType},
+                rentType: {type: String, enum: this.rentType, required: true},
                 dateAvailableRange: [Date],
                 dateAvailable: Date,
                 furnished: {type: Boolean, default: false},
@@ -132,17 +132,17 @@ export const FlatSeekerSchema = new Schema({
         },
         flatmates: {
             amount: {
-                from: Number,
-                to: Number,
+                from: {type: Number, required: true},
+                to: {type: Number, required: true},
             },
             age: {
-                from: Number,
-                to: Number,
+                from: {type: Number, required: true},
+                to: {type: Number, required: true},
             },
         },
-        genderRestriction: {type: String, enum: this.genderRestrictions},
-        cleanliness: String,
-        cleaningSchedule: String,
+        genderRestriction: {type: String, enum: this.genderRestrictions, required: true},
+        cleanliness: {type: String, required: true},
+        cleaningSchedule: {type: String, required: true},
         activities: [String],
         smokers: {type: Boolean, default: false},
         pets: {type: Boolean, default: false},
