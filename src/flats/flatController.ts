@@ -4,6 +4,7 @@ import {formatOutput, formatUser} from '../utils'
 import {APILogger} from '../utils/logger'
 import {Flat} from "./flat";
 import {createMockFlats} from "./flatService";
+import { FlatOfferer } from '../flatOfferer/flatOfferer';
 
 // TODO (Q) wait for flat offerer registration
 export let getFlats = async (req: Request, res: Response, next: NextFunction) => {
@@ -26,6 +27,20 @@ export let getFlat = async (req: Request, res: Response, next: NextFunction) => 
     if (!flat) {
         APILogger.logger.info(`[GET] [/flats/:{id}] flats with id ${id} not found`);
         return res.status(404).send();
+    }
+    
+    return formatOutput(res, flat, 200, "flat");
+};
+
+export let getOffererFlat = async (req: Request, res: Response, next: NextFunction) => {
+    const token = req.header('Authorization');
+    const userId = await User.findOne({jwt_token: token}).select("_id");
+    const flatId = await FlatOfferer.findOne({user: userId}).select("flat");
+
+    const flat = await Flat.findById(flatId);
+    if (!flat) {
+        APILogger.logger.info(`[GET] [/flats/my-flat] flats with id ${flatId} not found`);
+        return res.status(404).send(`No flat found for user ${flatId}`);
     }
     
     return formatOutput(res, flat, 200, "flat");
