@@ -1,3 +1,5 @@
+import {IUserModel, User} from "../users/user";
+import {Logger} from '../utils/logger';
 import {IScheduleModel, Schedule} from './schedule';
 import moment = require("moment");
 
@@ -39,12 +41,6 @@ export let createTimeslots = (schedule, startHour, startMinute, endHour, endMinu
         startTime = timeslot;
     }
 
-    schedule.timeslots.push({
-        startTime: startTime,
-        endTime: moment(timeslot).add(sessionTime, 'minutes').toDate(),
-        userId: null
-    });
-
     return schedule
 };
 
@@ -59,3 +55,21 @@ export let getPastTimeslot = (schedules) => {
 
     return timeslots
 };
+
+export const findSchedule = async (param) => {
+    return await Schedule.find(param).lean().catch((e) => {
+        Logger.logger.info(`[GET] [/schedules] something went wrong`);
+        return null;
+    });
+}
+
+export const findScheduleById = async (id) => {
+    return await Schedule.findById(id).catch((e) => {
+        Logger.logger.info(`[GET] [/schedules] something went wrong`);
+        return null;
+    });
+}
+
+export const findTimeslots = async (param) => {
+    return await Schedule.find(param).select("timeslots");
+}
