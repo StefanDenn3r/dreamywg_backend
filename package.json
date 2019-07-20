@@ -38,6 +38,7 @@
     "@types/cors": "^2.8.5",
     "@types/express": "^4.16.0",
     "@types/express-winston": "^3.0.1",
+    "@types/helmet": "0.0.43",
     "@types/jsonwebtoken": "^8.3.2",
     "@types/lodash": "^4.14.136",
     "@types/mocha": "^5.2.5",
@@ -81,19 +82,19 @@
     "https": "^1.0.0",
     "js2xmlparser": "^4.0.0",
     "jsonwebtoken": "^8.5.1",
+    "lodash": "latest",
     "moment": "latest",
-    "mongodb": "^3.2.7",
-    "mongoose": "^4.1.9",
+    "mongodb": "latest",
+    "mongoose": "latest",
     "mongoose-extend-schema": "latest",
     "morgan": "^1.9.1",
     "nodemailer": "^6.2.1",
     "oauth": "^0.9.15",
     "query-string": "^6.8.1",
     "save": "^2.3.3",
+    "socket.io": "latest",
     "tsc-watch": "^2.1.2",
     "uuid": "^3.3.2",
-    "winston": "^3.2.1",
-    "lodash": "latest",
-    "socket.io": "latest"
+    "winston": "^3.2.1"
   }
 }

@@ -37,6 +37,15 @@ export class FlatOffererService {
         }
     }
 
+    static async getFlatoffererByUser(user) {
+        try {
+            return await FlatOfferer.findOne({user: user}).populate('flat').exec();
+        } catch (e) {
+            Logger.logger.error(e);
+            return null
+        }
+    }
+
     static async createFlatOfferer(token, body) {
         const user = await UserService.getUserByToken(token);
         if (!user)

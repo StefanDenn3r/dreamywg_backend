@@ -16,7 +16,7 @@ export class FlatController {
     static getFlat = async (req: Request, res: Response, next: NextFunction) => {
         const id = req.params.id;
         const flat = await FlatService.getFlatById(id);
-        
+
         if (!flat)
             return res.status(400).send();
         else {
@@ -27,7 +27,7 @@ export class FlatController {
     static getOffererFlat = async (req: Request, res: Response, next: NextFunction) => {
         const token = req.header('Authorization');
 
-        const flat = await FlatService.getOffererFlat(token)
+        const flat = await FlatService.getFlatByToken(token);
 
         if (!flat)
             return res.status(400).send();

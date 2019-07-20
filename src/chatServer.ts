@@ -87,7 +87,7 @@ export class ChatServer {
 
     private async mongoSetup() {
         try {
-            await mongoose.connect(this.mongoUrl, {socketOptions: config.get("mongo.config")});
+            await mongoose.connect(this.mongoUrl, config.get("mongo.config"));
             Logger.logger.info(
                 `Connection to MongoDB at ${this.mongoUrl} established`
             );
