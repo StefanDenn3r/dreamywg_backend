@@ -1,21 +1,73 @@
 import {NextFunction, Request, Response} from "express";
-import {mergeWith, isArray} from "lodash";
-import {getUserByToken} from "../users/userController";
-import {formatOutput, formatUser} from "../utils";
-import {APILogger} from "../utils/logger";
-import {Type} from "../utils/selectionEnums";
+import {isArray, mergeWith} from "lodash";
 import {FlatSeeker} from "./flatSeeker";
-import {matchOnDb} from "./flatSeekerService";
+import {FlatSeekerService} from "./flatSeekerService";
 import {saveImageToFile} from '../utils/file';
+import {UserService} from "../users/userService";
+import {SearchService} from "./searchService";
 
-export let searchFlats = async (req: Request, res: Response) => {
-    try {
-        const user = await getUserByToken(req.header('Authorization'));
-        let flatSeeker = await FlatSeeker.findOne({user: user}).populate('user');
+export class FlatSeekerController {
+    static deleteAllFlatSeekers = async (req: Request, res: Response) => {
+        const flatSeeker = await FlatSeekerService.deleteAllFlatSeekers();
 
+        if (!flatSeeker)
+            return res.status(400).send();
+        else {
+            return res.json(flatSeeker)
+        }
+    };
+
+
+    static getFlatSeeker = async (req: Request, res: Response, next: NextFunction) => {
+        const id = req.params.id;
+        const flatSeeker = await FlatSeekerService.getFlatSeekerById(id);
+
+        if (!flatSeeker)
+            return res.status(400).send();
+        else {
+            return res.json(flatSeeker)
+        }
+    };
+
+    static getFlatSeekers = async (req: Request, res: Response) => {
+        const flatSeekers = await FlatSeekerService.getAllFlatSeekers();
+
+        if (!flatSeekers)
+            return res.status(400).send();
+        else {
+            return res.json(flatSeekers)
+        }
+    };
+
+
+    static createFlatSeeker = async (req: Request, res: Response, next: NextFunction) => {
+        const token = req.header('Authorization');
+
+        req.body.personalInformation.image = await saveImageToFile(req.body.personalInformation.image);
+
+        const flatSeeker = await FlatSeekerService.createFlatSeeker(token, req.body);
+
+        if (!flatSeeker)
+            return res.status(400).send();
+        else {
+            return res.json(flatSeeker)
+        }
+
+    };
+
+    static searchFlats = async (req: Request, res: Response) => {
         const body = req.body;
         const page = body.page;
         const elementsPerPage = body.elementsPerPage;
+        const token = req.header('Authorization');
+
+        const user = await UserService.getUserByToken(token);
+        if (!user)
+            return res.status(400).send();
+
+        let flatSeeker = await FlatSeekerService.getFlatSeekerByUser(user);
+        if (!flatSeeker)
+            return res.status(400).send();
 
         flatSeeker = mergeWith(flatSeeker, body, (objValue, srcValue) => {
             if (isArray(objValue)) {
@@ -28,117 +80,51 @@ export let searchFlats = async (req: Request, res: Response) => {
         else
             flatSeeker.preferences.flat.room.dateAvailable = undefined;
 
-        const result = await matchOnDb(flatSeeker)
-
-        const resultLength = result.length;
-        if (resultLength > 0) {
-            const slicedResult = result.slice((page - 1) * elementsPerPage, page * elementsPerPage);
-            return res.send({
-                data: slicedResult,
-                totalResults: resultLength
-            })
+        const result = await SearchService.searchFlats(flatSeeker, page, elementsPerPage);
+        if (!result)
+            return res.status(400).send();
+        else {
+            return res.json(result)
         }
-        return res.status(200).send({
-            data: [],
-            totalResults: 0
-        })
-    } catch (e) {
-        console.log(e)
-        return res.status(400).send()
-    }
-};
 
 
-export let deleteAllFlatSeekers = async (req: Request, res: Response) => {
-    APILogger.logger.warn(`[DELETE] [/flatSeekers]`);
-
-    await FlatSeeker.remove({});
-
-    return res.status(204).send();
-};
-
-
-// TODO add try catch to every await
-export let getFlatSeekers = async (req: Request, res: Response) => {
-    const flatOfferer = await FlatSeeker.find();
-    if (!flatOfferer) {
-        APILogger.logger.info(`[GET] [/flatseekers] something went wrong`);
-        return res.status(404).send();
-    }
-
-    return formatOutput(res, flatOfferer.map(formatUser), 200, "flatofferer");
-};
-
-export let getFlatSeeker = async (req: Request, res: Response, next: NextFunction) => {
-    const id = req.params.id;
-
-    APILogger.logger.info(`[GET] [/flatseekers] ${id}`);
-
-    const flatofferer = await FlatSeeker.findById(id);
-    if (!flatofferer) {
-        APILogger.logger.info(
-            `[GET] [/flatseekers/:{id}] flatseekers with id ${id} not found`
-        );
-        return res.status(404).send();
-    }
-    return formatOutput(res, formatUser(flatofferer), 200, "flatseekers");
-};
-
-export let loadSearchProperties = async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.header('Authorization');
-    const user = await getUserByToken(token);
-    const flatSeeker = await FlatSeeker.findOne({user: user});
-
-    const result = {
-        preferences: {
-            flat: {
-                regions: flatSeeker.preferences.flat.regions,
-                room: {
-                    size: {
-                        from: flatSeeker.preferences.flat.room.size.from,
-                        to: flatSeeker.preferences.flat.room.size.to,
-                    },
-                    rent: {
-                        from: flatSeeker.preferences.flat.room.rent.from,
-                        to: flatSeeker.preferences.flat.room.rent.to,
-                    },
-                    furnished: flatSeeker.preferences.flat.room.furnished,
-                    rentType: flatSeeker.preferences.flat.room.rentType,
-                    dateAvailable: flatSeeker.preferences.flat.room.dateAvailable,
-                    dateAvailableRange: flatSeeker.preferences.flat.room.dateAvailableRange,
-                },
-                flatshareType: flatSeeker.preferences.flat.flatshareType,
-
-            },
-            flatEquipment: {
-                balcony: flatSeeker.preferences.flatEquipment.balcony
-            },
-            smokers: flatSeeker.preferences.smokers,
-            pets: flatSeeker.preferences.pets
-        }
     };
 
-    return res.status(200).send(result)
-};
+    static loadSearchProperties = async (req: Request, res: Response, next: NextFunction) => {
+        const token = req.header('Authorization');
+        const user = await UserService.getUserByToken(token);
+        const flatSeeker = await FlatSeeker.findOne({user: user});
 
-export let addFlatSeeker = async (req: Request, res: Response, next: NextFunction) => {
-    const user = await getUserByToken(req.header('Authorization'));
-    req.body.personalInformation.image = await saveImageToFile(req.body.personalInformation.image)
-    const newSeeker = new FlatSeeker(req.body);
+        const result = {
+            preferences: {
+                flat: {
+                    regions: flatSeeker.preferences.flat.regions,
+                    room: {
+                        size: {
+                            from: flatSeeker.preferences.flat.room.size.from,
+                            to: flatSeeker.preferences.flat.room.size.to,
+                        },
+                        rent: {
+                            from: flatSeeker.preferences.flat.room.rent.from,
+                            to: flatSeeker.preferences.flat.room.rent.to,
+                        },
+                        rentType: flatSeeker.preferences.flat.room.rentType,
+                        dateAvailable: flatSeeker.preferences.flat.room.dateAvailable,
+                        dateAvailableRange: flatSeeker.preferences.flat.room.dateAvailableRange,
+                    },
+                    flatshareType: flatSeeker.preferences.flat.flatshareType,
 
-    if (!user || !newSeeker) {
-        APILogger.logger.info(`Something went wrong.`);
-        return res.status(404).send();
-    }
+                },
+                flatEquipment: {
+                    balcony: flatSeeker.preferences.flatEquipment.balcony,
+                    washingMachine: flatSeeker.preferences.flatEquipment.washingMachine,
+                    dishwasher: flatSeeker.preferences.flatEquipment.dishwasher,
+                    parkingLot: flatSeeker.preferences.flatEquipment.parkingLot
+                }
+            }
+        };
 
-    newSeeker.user = user._id;
-    user.type = Type.SEEKER;
-    try {
-        await user.save();
-        await newSeeker.save();
-        console.log(`Seeker successfully saved for user with email: ${newSeeker.user.email}`);
-        return res.status(200).send();
-    } catch (e) {
-        APILogger.logger.info(`Something went wrong. Error: ${e}`);
-    }
-};
+        return res.status(200).send(result)
+    };
+
+}
