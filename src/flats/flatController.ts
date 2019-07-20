@@ -24,6 +24,19 @@ export class FlatController {
         }
     };
 
+    static getOffererFlat = async (req: Request, res: Response, next: NextFunction) => {
+        const token = req.header('Authorization');
+        
+        const flat = await FlatService.getOffererFlat(token)
+        
+        if (!flat)
+            return res.status(400).send();
+        else {
+            return res.json(flat)
+        }
+    };
+    
+
     static createFlat = async (req: Request, res: Response, next: NextFunction) => {
         let flat = new Flat(req.body);
         flat = await FlatService.createFlat(flat);
