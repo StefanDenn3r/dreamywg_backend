@@ -1,76 +1,59 @@
 import {NextFunction, Request, Response} from 'express'
-import {User} from '../users/user'
-import {formatOutput, formatUser} from '../utils'
-import {APILogger} from '../utils/logger'
-import {Flat} from "./flat";
-import {createMockFlats} from "./flatService";
+import {FlatService} from "./flatService";
+import {Flat} from './flat'
 
-// TODO (Q) wait for flat offerer registration
-export let getFlats = async (req: Request, res: Response, next: NextFunction) => {
-    const flats = await Flat.find();
+export class FlatController {
+    static getFlats = async (req: Request, res: Response, next: NextFunction) => {
+        const flats = await FlatService.getAllFlats();
 
-    if (!flats) {
-        APILogger.logger.info(`[GET] [/flats] something went wrong`);
-        return res.status(404).send();
-    }
+        if (!flats)
+            return res.status(400).send();
+        else {
+            return res.json(flats)
+        }
+    };
 
-    return formatOutput(res, flats, 200, "flats");
-};
+    static getFlat = async (req: Request, res: Response, next: NextFunction) => {
+        const id = req.params.id;
+        const flat = await FlatService.getFlatById(id);
 
-export let getFlat = async (req: Request, res: Response, next: NextFunction) => {
-    const id = req.params.id;
+        if (!flat)
+            return res.status(400).send();
+        else {
+            return res.json(flat)
+        }
+    };
 
-    APILogger.logger.info(`[GET] [/flats/] ${id}`);
+    static createFlat = async (req: Request, res: Response, next: NextFunction) => {
+        let flat = new Flat(req.body);
+        flat = await FlatService.createFlat(flat);
 
-    const flat = await Flat.findById(id);
-    if (!flat) {
-        APILogger.logger.info(`[GET] [/flats/:{id}] flats with id ${id} not found`);
-        return res.status(404).send();
-    }
-    
-    return formatOutput(res, flat, 200, "flat");
-};
+        if (!flat)
+            return res.status(400).send();
+        else {
+            return res.json(flat)
+        }
+    };
 
-export let addFlat = async (req: Request, res: Response, next: NextFunction) => {
-    const flat = new Flat(req.body);
-    if (!flat) {
-        APILogger.logger.info(`Something went wrong.`);
-        return res.status(404).send();
-    }
+    static deleteFlat = async (req: Request, res: Response) => {
+        const id = req.params.id;
+        const flat = await FlatService.deleteFlatById(id);
 
-    try {
-        await flat.save();
-        console.log(`Flat added successfully`);
-        return res.status(200).send();
-    } catch (e) {
-        APILogger.logger.info(`Something went wrong. Error: ${e}`);
-    }
-};
-
-export let deleteFlat = async (req: Request, res: Response) => {
-    const id = req.params.id;
-
-    APILogger.logger.info(`[GET] [/flats/] ${id}`);
-
-    await Flat.findByIdAndDelete(id);
-
-    return res.status(204).send();
-};
+        if (!flat)
+            return res.status(400).send();
+        else {
+            return res.json(flat)
+        }
+    };
 
 
-export let deleteAllFlats = async (req: Request, res: Response) => {
-    APILogger.logger.warn(`[DELETE] [/flats]`);
+    static deleteAllFlats = async (req: Request, res: Response) => {
+        const flat = await FlatService.deleteAllFlats();
 
-    await Flat.remove({});
-
-    return res.status(204).send();
-};
-
-export const generateFlats =async (req: Request, res: Response) => {
-    try {
-        await createMockFlats(5);
-        res.status(200).send()
-    } catch (e) {
-        return res.status(404).send(e);
-    }
+        if (!flat)
+            return res.status(400).send();
+        else {
+            return res.json(flat)
+        }
+    };
 }

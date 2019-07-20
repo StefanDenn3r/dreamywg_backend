@@ -7,12 +7,13 @@ import * as helmet from "helmet";
 import * as mongoose from "mongoose";
 import * as morgan from "morgan";
 import * as errorHandler from "./utils/errorHandler";
-import {APILogger, WinstonStream} from "./utils/logger";
+import {Logger, WinstonStream} from "./utils/logger";
 
 
 import {FlatOffererRoute} from "./flatOfferer/flatOffererAPI";
-import {FlatRoute} from './flats/flatAPI'
 import {FlatSeekerRoute} from "./flatSeeker/flatSeekerAPI";
+import {FlatRoute} from './flats/flatAPI';
+import {ChatRoute} from './chat/chatAPI';
 import {ScheduleRoute} from './schedules/scheduleAPI'
 import {UserRoute} from './users/userAPI'
 
@@ -21,6 +22,7 @@ export default class Server {
     public userRoutes: UserRoute = new UserRoute();
     public flatRoutes: UserRoute = new FlatRoute();
     public flatOffererRoutes: FlatOffererRoute = new FlatOffererRoute();
+    public chatRoutes: ChatRoute = new ChatRoute();
     public env: string = process.env.NODE_ENV || 'development';
     public port: number | string;
     private mongoUrl: string = config.get('mongo.URI');
@@ -41,14 +43,14 @@ export default class Server {
     private async start() {
         await this.mongoSetup();
         this.app.listen(this.app.get("port"), () => {
-            APILogger.logger.info(
+            Logger.logger.info(
                 `Server [${config.get(
                     "name"
                 )}] is running at http://localhost:${this.app.get(
                     "port"
                 )} in ${this.app.get("env")} Mode`
             );
-            APILogger.logger.info("Press CTRL-C to stop");
+            Logger.logger.info("Press CTRL-C to stop");
         });
     }
 
@@ -65,7 +67,7 @@ export default class Server {
         this.app.use(errorHandler.logging);
         this.app.use(errorHandler.clientErrorHandler);
         this.app.use(errorHandler.errorHandler);
-        APILogger.logger.info(
+        Logger.logger.info(
             "Applied middleware: [HELMET][CORS][COMPRESSION][LOGGING][ERROR HANDLER]"
         );
     }
@@ -81,21 +83,21 @@ export default class Server {
         });
 
         UserRoute.routes(this.app);
-        FlatRoute.routes(this.app);              
+        FlatRoute.routes(this.app);
         FlatOffererRoute.routes(this.app);
         FlatSeekerRoute.routes(this.app);
         ScheduleRoute.routes(this.app);
-        APILogger.logger.info('Applied Routes: [USER][FLAT][AUTHENTICATION][BUSINESS LOGIC]')
+        ChatRoute.routes(this.app);
     }
 
     private async mongoSetup() {
         try {
             await mongoose.connect(this.mongoUrl, {socketOptions: config.get("mongo.config")});
-            APILogger.logger.info(
+            Logger.logger.info(
                 `Connection to MongoDB at ${this.mongoUrl} established`
             );
         } catch (err) {
-            APILogger.logger.error(
+            Logger.logger.error(
                 `Connection to MONGO DB failed : ${err} - Shutting down Server`
             );
         }
