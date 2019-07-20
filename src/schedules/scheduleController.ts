@@ -3,34 +3,24 @@ import {IUserModel, User} from "../users/user";
 import {Logger} from '../utils/logger';
 import * as scheduleService from './scheduleService'
 import {IScheduleModel, Schedule} from "./schedule";
+import { UserService } from '../users/userService';
 
 export let getSchedules = async (req: Request, res: Response, next: NextFunction) => {
-    let schedules = await Schedule.find().lean().catch((e) => {
-        Logger.logger.info(`[GET] [/schedules] something went wrong`);
-        next(e);
-        return null;
-    });
+    let schedules = await scheduleService.findSchedule({})
 
     return res.end(JSON.stringify(schedules));
 };
 
 export let getSchedulesByFlat = async (req: Request, res: Response, next: NextFunction) => {
-    let schedules = await Schedule.find({flatId: req.params.flatId}).lean().catch((e) => {
-        Logger.logger.info(`[GET] [/schedules] something went wrong`);
-        next(e);
-        return null;
-    });
-
+    let schedules = await scheduleService.findSchedule({flatId: req.params.flatId})
+    
     return res.end(JSON.stringify(schedules));
 };
 
 export let getSchedule = async (req: Request, res: Response, next: NextFunction) => {
     const id = req.params.id;
-    let schedule = await Schedule.findById(id).lean().catch((e) => {
-        Logger.logger.info(`[GET] [/schedules] something went wrong`);
-        next(e);
-        return null;
-    });
+    let schedule = await scheduleService.findScheduleById(id)
+    
     return res.json(schedule);
 };
 
@@ -56,13 +46,8 @@ export let createTimeslots = async (req: Request, res: Response, next: NextFunct
     const [endHour, endMinute] = req.body.endTime.split(':');
     const sessionTime = parseInt(req.body.sessionTime);
 
-    let schedule: IScheduleModel = await Schedule.findById(scheduleId).catch((e) => {
-        console.error(e);
-        Logger.logger.info(`[GET] [/schedules] something went wrong`);
-        next(e);
-        return null;
-    });
-
+    let schedule: IScheduleModel = await scheduleService.findScheduleById(scheduleId)
+    console.log(schedule, 'schedule')
     schedule = scheduleService.createTimeslots(schedule, startHour, startMinute, endHour, endMinute, sessionTime);
 
     const savedSchedule = await schedule.save().catch(error => {
@@ -76,10 +61,11 @@ export let createTimeslots = async (req: Request, res: Response, next: NextFunct
 export let getPastTimeslots = async (req: Request, res: Response, next: NextFunction) => {
     const flatId = req.params.flatId;
     const recentDate = new Date();
-    const schedules = await Schedule.find({
+    
+    const schedules = await scheduleService.findTimeslots({
         "flatId": flatId,
         "timeslots.endTime": {$lt: recentDate}
-    }).select("timeslots");
+    })
 
     const timeslots = scheduleService.getPastTimeslot(schedules);
 
@@ -89,7 +75,7 @@ export let getPastTimeslots = async (req: Request, res: Response, next: NextFunc
 export let updatePastTimeslotStatus = async (req: Request, res: Response, next: NextFunction) => {
     const token = req.header('Authorization');
 
-    const user: IUserModel = await User.findOne({jwt_token: token});
+    const user: IUserModel = await UserService.getUserByToken(token)
     if (!user) {
         Logger.logger.info(`[PATCH] user not found`);
         return res.status(404).send()
@@ -122,7 +108,7 @@ export let cancelTimeslot = async (req: Request, res: Response, next: NextFuncti
     const token = req.header('Authorization');
     const timeslotId = req.params.id
 
-    const user: IUserModel = await User.findOne({jwt_token: token});
+    const user: IUserModel = await UserService.getUserByToken(token)
     if (!user) {
         Logger.logger.info(`[PATCH] user not found`);
         return res.status(404).send()
@@ -138,5 +124,5 @@ export let cancelTimeslot = async (req: Request, res: Response, next: NextFuncti
 
 export let deleteAllSchedule = async (req: Request, res: Response, next: NextFunction) => {
     await Schedule.deleteMany({});
-    return res.end(JSON.stringify("HAHAHA"));
+    return res.end(JSON.stringify("HAHAHA. ALL SCHEDULES DELETED"));
 };
