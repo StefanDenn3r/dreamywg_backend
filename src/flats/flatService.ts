@@ -37,9 +37,9 @@ export class FlatService {
     static async getOffererFlat(token) {
         try {
             const userId = await User.findOne({jwt_token: token}).select("_id");
-            const flatId = await FlatOfferer.findOne({user: userId}).select("flat");
+            const flatOfferer = await FlatOfferer.findOne({user: userId});
 
-            return await Flat.findById(flatId);
+            return await Flat.findById(flatOfferer.flat);
         } catch (e) {
             Logger.logger.error(e);
             return null
