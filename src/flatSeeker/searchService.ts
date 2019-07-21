@@ -28,7 +28,6 @@ export class SearchService {
         const preferences = flatSeeker.preferences;
 
         try {
-            const flats = await Flat.find();
             const dbFilteredFlats = (await Flat.find()
                     .where('region').in(preferences.flat.regions)
                     .where('flatshareType').equals(preferences.flat.flatshareType)
@@ -43,8 +42,8 @@ export class SearchService {
                     })
                     .where('flatmatePreferences.cleanliness').equals(preferences.cleanliness)
                     .where('flatmatePreferences.cleaningSchedule').equals(preferences.cleaningSchedule)
-                  //  .where('flatmatePreferences.smokersAllowed').equals(preferences.smokers)
-                   // .where('flatmatePreferences.petsAllowed').equals(preferences.pets)
+                    .where('flatmatePreferences.smokersAllowed').equals(preferences.smokers)
+                    .where('flatmatePreferences.petsAllowed').equals(preferences.pets)
                     .where('flatmatePreferences.occupations').equals(personalInformation.occupation)
                     .$where(`this.flatmates.length>=${preferences.flatmates.amount.from}`)
                     .$where(`this.flatmates.length<=${preferences.flatmates.amount.to}`)
@@ -60,7 +59,7 @@ export class SearchService {
                             && flat.rooms[0].dateAvailableRange[1] >= new Date(preferences.flat.room.dateAvailableRange[1]));
                     }
                 )
-                //.filter(flat => SearchService.NonEmpty(personalInformation.practiceOfAbstaining, personalInformation.practiceOfAbstaining.every(practice => SearchService.NonUndefined(flat.flatmatePreferences.practiceOfAbstaining, flat.flatmatePreferences.practiceOfAbstaining.contains(practice)))))
+                .filter(flat => SearchService.NonEmpty(personalInformation.practiceOfAbstaining, personalInformation.practiceOfAbstaining.every(practice => SearchService.NonUndefined(flat.flatmatePreferences.practiceOfAbstaining, flat.flatmatePreferences.practiceOfAbstaining.contains(practice)))))
                 .filter(flat => flat.flatmates.every(flatmate => SearchService.inBetween(preferences.flatmates.age, flatmate.age)))
                 .filter(flat => SearchService.inBetween(flat.flatmatePreferences.age, personalInformation.age))
                 .filter(flat => SearchService.flatshareExperienceComparison(flat.flatmatePreferences.flatshareExperience, personalInformation.flatshareExperience))
