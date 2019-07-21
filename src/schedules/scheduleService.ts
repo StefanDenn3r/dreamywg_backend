@@ -57,19 +57,19 @@ export let getPastTimeslot = (schedules) => {
 };
 
 export const findSchedule = async (param) => {
-    return await Schedule.find(param).lean().catch((e) => {
+    return await Schedule.find(param).populate('timeslots.userId', ['firstName', 'lastName', 'email']).lean().catch((e) => {
         Logger.logger.info(`[GET] [/schedules] something went wrong`);
         return null;
     });
 }
 
 export const findScheduleById = async (id) => {
-    return await Schedule.findById(id).catch((e) => {
+    return await Schedule.findById(id).populate('timeslots.userId', ['firstName', 'lastName', 'email']).catch((e) => {
         Logger.logger.info(`[GET] [/schedules] something went wrong`);
         return null;
     });
 }
 
 export const findTimeslots = async (param) => {
-    return await Schedule.find(param).select("timeslots");
+    return await Schedule.find(param).populate('timeslots.userId', ['firstName', 'lastName', 'email']).select("timeslots");
 }
