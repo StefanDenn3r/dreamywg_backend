@@ -1,33 +1,17 @@
 {
-  "name": "typescript-api",
+  "name": "seba2019",
   "version": "1.0.0",
-  "description": "Example API with Typescript",
+  "description": "SEBA 2019",
   "main": "./dist/app.js",
   "scripts": {
     "build": "npm run clean && tsc",
     "clean": "rimraf dist && rimraf reports",
-    "lint": "tslint ./src/**/*.ts ./test/**/*.spec.ts",
-    "lint:fix": "tslint --fix ./src/**/*.ts ./test/**/*.spec.ts -t verbose",
-    "pretest": "cross-env NODE_ENV=test npm run build && npm run lint",
-    "test": "cross-env NODE_ENV=test mocha --reporter spec --compilers ts:ts-node/register test/**/*.spec.ts ",
-    "test:mutation": "stryker run",
-    "stryker:init": "stryker init",
     "dev": "cross-env PORT=4005 NODE_ENV=dev ts-node ./src/app.ts",
-    "socket": "cross-env PORT=8080 NODE_ENV=dev ts-node ./src/chatApp.ts",
-    "dev2": "NODE_ENV=development tsc-watch --onSuccess \"node ./dist/app.js\"",
-    "debug": "cross-env PORT=4005 NODE_ENV=dev ts-node --debug-brk ./src/app.ts",
-    "prod": "PORT=3000 npm run build && npm run start",
-    "tsc": "tsc"
+    "socket": "cross-env PORT=8080 NODE_ENV=dev ts-node ./src/chatApp.ts"
   },
   "engines": {
     "node": ">=10.0.0"
   },
-  "keywords": [
-    "order POC",
-    "Hands on TypeScript 3",
-    "TypeScript 3",
-    "Packt Books"
-  ],
   "devDependencies": {
     "@types/bcrypt": "^3.0.0",
     "@types/body-parser": "^1.17.0",
@@ -37,7 +21,7 @@
     "@types/config": "0.0.34",
     "@types/cors": "^2.8.5",
     "@types/express": "^4.16.0",
-    "@types/express-winston": "^3.0.1",
+    "@types/express-winston": "^3.0.npm 1",
     "@types/helmet": "0.0.43",
     "@types/jsonwebtoken": "^8.3.2",
     "@types/lodash": "^4.14.136",

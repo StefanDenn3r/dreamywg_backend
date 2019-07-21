@@ -57,7 +57,7 @@ export class UserController {
         user = await UserService.createUser(user);
 
         if (!user)
-            return res.status(400).send();
+            return res.status(400).send("User already exists");
         else {
             return res.json(user)
         }
