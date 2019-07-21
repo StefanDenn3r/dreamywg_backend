@@ -46,7 +46,7 @@ export class ScheduleController {
             const response = await Promise.all(schedules);
             return res.json(response)
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return res.status(400).send()
         }
     };
@@ -64,7 +64,7 @@ export class ScheduleController {
             const savedSchedule = await schedule.save();
             return res.json(savedSchedule);
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return res.status(400).send()
         }
     };

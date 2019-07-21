@@ -19,7 +19,7 @@ export class ChatService {
             });
             return chats;
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     };
@@ -28,7 +28,7 @@ export class ChatService {
         try {
             return await Chat.findOne({$or: [{$and: [{'user1.id': user1.id}, {'user2.id': user2.id}]}, {$and: [{'user1.id': user2.id}, {'user2.id': user1.id}]}]})
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     };
@@ -45,7 +45,7 @@ export class ChatService {
                 }
             });
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     };
@@ -54,7 +54,7 @@ export class ChatService {
         try {
             return await Chat.deleteMany({});
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     }
@@ -99,7 +99,7 @@ export class ChatService {
         try {
             await chat.save();
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     };

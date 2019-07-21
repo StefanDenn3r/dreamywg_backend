@@ -8,7 +8,7 @@ export class TokenService {
         try {
             return await Token.findOne({token: token});
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     };
@@ -19,7 +19,7 @@ export class TokenService {
         try {
             return await token.save();
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     }

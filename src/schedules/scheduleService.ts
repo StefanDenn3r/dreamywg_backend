@@ -46,7 +46,7 @@ export class ScheduleService {
         try {
             return await Schedule.deleteMany({});
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     }
@@ -67,7 +67,7 @@ export class ScheduleService {
         try {
             return await Schedule.find(param).populate('timeslots.userId', ['firstName', 'lastName', 'email']).lean()
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     };
@@ -76,7 +76,7 @@ export class ScheduleService {
         try {
             return await Schedule.findById(id).populate('timeslots.userId', ['firstName', 'lastName', 'email'])
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     };
@@ -85,7 +85,7 @@ export class ScheduleService {
         try {
             return await Schedule.find(param).populate('timeslots.userId', ['firstName', 'lastName', 'email']).select("timeslots");
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     }

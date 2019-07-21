@@ -21,7 +21,7 @@ export class UserService {
         try {
             return await User.findOne({jwt_token: token});
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     };
@@ -54,7 +54,7 @@ export class UserService {
                 user.accessTokenFacebook = result.data.access_token;
                 await user.save();
             } catch (e) {
-                Logger.logger.error(e);
+                Logger.logger.error(e.message);
                 return null
             }
         }
@@ -76,7 +76,7 @@ export class UserService {
                     token: token
                 }
             } catch (e) {
-                Logger.logger.error(e);
+                Logger.logger.error(e.message);
                 return null
             }
         } else {
@@ -110,7 +110,7 @@ export class UserService {
         try {
             return await User.find();
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     }
@@ -119,7 +119,7 @@ export class UserService {
         try {
             return await User.findById(id);
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     }
@@ -128,7 +128,7 @@ export class UserService {
         try {
             return await User.findOne({email: email});
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     }
@@ -141,7 +141,7 @@ export class UserService {
             await UserService.sendVerificationMail(user);
             return newUser
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     }
@@ -153,7 +153,7 @@ export class UserService {
         try {
             return await mergedUser.save()
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     }
@@ -162,7 +162,7 @@ export class UserService {
         try {
             return await User.findByIdAndDelete(id);
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     }
@@ -171,7 +171,7 @@ export class UserService {
         try {
             return await User.deleteMany({});
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     }

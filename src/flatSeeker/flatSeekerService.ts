@@ -13,7 +13,7 @@ export class FlatSeekerService {
         try {
             return await FlatSeeker.deleteMany({});
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     }
@@ -22,7 +22,7 @@ export class FlatSeekerService {
         try {
             return await FlatSeeker.findOne({user: user}).populate('user');
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     }
@@ -31,7 +31,7 @@ export class FlatSeekerService {
         try {
             return await FlatSeeker.findById(id);
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     }
@@ -40,7 +40,7 @@ export class FlatSeekerService {
         try {
             return await FlatSeeker.find();
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     }
@@ -61,7 +61,7 @@ export class FlatSeekerService {
         try {
             return await newSeeker.save();
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
 
