@@ -48,20 +48,20 @@ export class ChatServer {
 
     private async listen() {
         this.server.listen(this.port, () => {
-            console.log('Running server on port %s', this.port);
+            Logger.logger.info(`Running server on port ${this.port}`);
         });
 
         this.io.on('connect', this.connect.bind(this));
     }
 
     private connect(socket) {
-        console.log('Connected client on port %s.', this.port);
+        Logger.logger.info(`Connected client on port ${this.port}`);
         this.socket = socket;
         socket.on('storeClientInfo', this.storeClientInfo.bind(this));
         socket.on('sendMessage', this.message.bind(this));
 
         socket.on('disconnect', () => {
-            console.log('Client disconnected');
+            Logger.logger.info('Client disconnected');
         });
     }
 
@@ -70,7 +70,7 @@ export class ChatServer {
     }
 
     private async message(message) {
-        Logger.logger.info('[server](message): %s', JSON.stringify(message));
+        Logger.logger.info(`[server](message): ${JSON.stringify(message)}`);
 
         const user1 = message.user1;
         const user2 = message.user2;
@@ -87,7 +87,7 @@ export class ChatServer {
 
     private async mongoSetup() {
         try {
-            await mongoose.connect(this.mongoUrl, {socketOptions: config.get("mongo.config")});
+            await mongoose.connect(this.mongoUrl, config.get("mongo.config"));
             Logger.logger.info(
                 `Connection to MongoDB at ${this.mongoUrl} established`
             );
