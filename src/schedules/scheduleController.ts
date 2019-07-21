@@ -42,13 +42,13 @@ export class ScheduleController {
 
         const schedules = ScheduleService.createSchedule(startDate, endDate, flatId);
 
-        const response = await Promise.all(schedules).catch(error => {
-            Logger.logger.error(`[POST] [/schedules] something went wrong when saving a new schedule | ${error.message}`);
-            next(error);
-            return null
-        });
-
-        return res.json(response);
+        try {
+            const response = await Promise.all(schedules);
+            return res.json(response)
+        } catch (e) {
+            Logger.logger.error(e);
+            return res.status(400).send()
+        }
     };
 
     static createTimeslots = async (req: Request, res: Response, next: NextFunction) => {
@@ -60,12 +60,13 @@ export class ScheduleController {
         let schedule: IScheduleModel = await ScheduleService.findScheduleById(scheduleId);
         schedule = ScheduleService.createTimeslots(schedule, startHour, startMinute, endHour, endMinute, sessionTime);
 
-        const savedSchedule = await schedule.save().catch(error => {
-            Logger.logger.error(`[POST] [/schedules] something went wrong when saving a new timeslot | ${error.message}`);
-            next(error);
-            return null
-        });
-        return res.json(savedSchedule);
+        try {
+            const savedSchedule = await schedule.save();
+            return res.json(savedSchedule);
+        } catch (e) {
+            Logger.logger.error(e);
+            return res.status(400).send()
+        }
     };
 
     static getPastTimeslots = async (req: Request, res: Response, next: NextFunction) => {
