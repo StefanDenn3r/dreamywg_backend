@@ -1,128 +1,154 @@
 import {NextFunction, Request, Response} from 'express'
-import {IUserModel, User} from "../users/user";
 import {Logger} from '../utils/logger';
-import * as scheduleService from './scheduleService'
 import {IScheduleModel, Schedule} from "./schedule";
-import { UserService } from '../users/userService';
+import {UserService} from '../users/userService';
+import {ScheduleService} from "./scheduleService";
 
-export let getSchedules = async (req: Request, res: Response, next: NextFunction) => {
-    let schedules = await scheduleService.findSchedule({})
+export class ScheduleController {
+    static getSchedules = async (req: Request, res: Response, next: NextFunction) => {
+        let schedules = await ScheduleService.findSchedule({});
 
-    return res.end(JSON.stringify(schedules));
-};
+        if (!schedules)
+            return res.status(400).send();
+        else {
+            return res.json(schedules)
+        }
+    };
 
-export let getSchedulesByFlat = async (req: Request, res: Response, next: NextFunction) => {
-    let schedules = await scheduleService.findSchedule({flatId: req.params.flatId})
-    
-    return res.end(JSON.stringify(schedules));
-};
+    static getSchedulesByFlat = async (req: Request, res: Response, next: NextFunction) => {
+        let schedules = await ScheduleService.findSchedule({flatId: req.params.flatId});
+        if (!schedules)
+            return res.status(400).send();
+        else {
+            return res.json(schedules)
+        }
+    };
 
-export let getSchedule = async (req: Request, res: Response, next: NextFunction) => {
-    const id = req.params.id;
-    let schedule = await scheduleService.findScheduleById(id)
-    
-    return res.json(schedule);
-};
+    static getSchedule = async (req: Request, res: Response, next: NextFunction) => {
+        const id = req.params.id;
+        let schedule = await ScheduleService.findScheduleById(id);
 
-export let createSchedules = async (req: Request, res: Response, next: NextFunction) => {
-    const startDate = new Date(req.body.startDate);
-    const endDate = new Date(req.body.endDate);
-    const flatId = req.body.flatId;
+        if (!schedule)
+            return res.status(400).send();
+        else {
+            return res.json(schedule)
+        }
+    };
 
-    const schedules = scheduleService.createSchedule(startDate, endDate, flatId);
+    static createSchedules = async (req: Request, res: Response, next: NextFunction) => {
+        const startDate = new Date(req.body.startDate);
+        const endDate = new Date(req.body.endDate);
+        const flatId = req.body.flatId;
 
-    const response = await Promise.all(schedules).catch(error => {
-        Logger.logger.error(`[POST] [/schedules] something went wrong when saving a new schedule | ${error.message}`);
-        next(error);
-        return null
-    });
+        const schedules = ScheduleService.createSchedule(startDate, endDate, flatId);
 
-    return res.end(JSON.stringify(response));
-};
+        const response = await Promise.all(schedules).catch(error => {
+            Logger.logger.error(`[POST] [/schedules] something went wrong when saving a new schedule | ${error.message}`);
+            next(error);
+            return null
+        });
 
-export let createTimeslots = async (req: Request, res: Response, next: NextFunction) => {
-    const scheduleId = req.params.id;
-    const [startHour, startMinute] = req.body.startTime.split(':');
-    const [endHour, endMinute] = req.body.endTime.split(':');
-    const sessionTime = parseInt(req.body.sessionTime);
+        return res.json(response);
+    };
 
-    let schedule: IScheduleModel = await scheduleService.findScheduleById(scheduleId)
-    console.log(schedule, 'schedule')
-    schedule = scheduleService.createTimeslots(schedule, startHour, startMinute, endHour, endMinute, sessionTime);
+    static createTimeslots = async (req: Request, res: Response, next: NextFunction) => {
+        const scheduleId = req.params.id;
+        const [startHour, startMinute] = req.body.startTime.split(':');
+        const [endHour, endMinute] = req.body.endTime.split(':');
+        const sessionTime = parseInt(req.body.sessionTime);
 
-    const savedSchedule = await schedule.save().catch(error => {
-        Logger.logger.error(`[POST] [/schedules] something went wrong when saving a new timeslot | ${error.message}`);
-        next(error);
-        return null
-    });
-    return res.end(JSON.stringify(savedSchedule));
-};
+        let schedule: IScheduleModel = await ScheduleService.findScheduleById(scheduleId);
+        schedule = ScheduleService.createTimeslots(schedule, startHour, startMinute, endHour, endMinute, sessionTime);
 
-export let getPastTimeslots = async (req: Request, res: Response, next: NextFunction) => {
-    const flatId = req.params.flatId;
-    const recentDate = new Date();
-    
-    const schedules = await scheduleService.findTimeslots({
-        "flatId": flatId,
-        "timeslots.endTime": {$lt: recentDate}
-    })
+        const savedSchedule = await schedule.save().catch(error => {
+            Logger.logger.error(`[POST] [/schedules] something went wrong when saving a new timeslot | ${error.message}`);
+            next(error);
+            return null
+        });
+        return res.json(savedSchedule);
+    };
 
-    const timeslots = scheduleService.getPastTimeslot(schedules);
+    static getPastTimeslots = async (req: Request, res: Response, next: NextFunction) => {
+        const flatId = req.params.flatId;
+        const recentDate = new Date();
 
-    return res.end(JSON.stringify(timeslots));
-};
+        const schedules = await ScheduleService.findTimeslots({
+            "flatId": flatId,
+            "timeslots.endTime": {$lt: recentDate}
+        });
 
-export let updatePastTimeslotStatus = async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.header('Authorization');
+        if (!schedules)
+            return res.status(400).send();
 
-    const user: IUserModel = await UserService.getUserByToken(token)
-    if (!user) {
-        Logger.logger.info(`[PATCH] user not found`);
-        return res.status(404).send()
-    }
+        const timeslots = ScheduleService.getPastTimeslot(schedules);
 
-    const timeslotId = req.params.id
-    const newStatus = req.body.status
-    let schedules = []
-    
-    if (newStatus == 'BOOKED') { // TODO should use enum
-        //only update user id when status is booked
-        schedules = await Schedule.update({'timeslots._id': timeslotId}, {
+        return res.json(timeslots)
+    };
+
+    static updatePastTimeslotStatus = async (req: Request, res: Response, next: NextFunction) => {
+        const token = req.header('Authorization');
+
+        const user = await UserService.getUserByToken(token);
+        if (!user) {
+            return res.status(404).send()
+        }
+
+        const timeslotId = req.params.id;
+        const newStatus = req.body.status;
+        let schedules = [];
+
+        if (newStatus == 'BOOKED') {
+            //only update user id when status is booked
+            schedules = await Schedule.update({'timeslots._id': timeslotId}, {
+                '$set': {
+                    'timeslots.$.userId': user._id,
+                    'timeslots.$.status': newStatus
+                }
+            })
+        } else {
+            schedules = await Schedule.update({'timeslots._id': timeslotId}, {
+                '$set': {
+                    'timeslots.$.status': newStatus
+                }
+            })
+        }
+        if (!schedules)
+            return res.status(400).send();
+        else {
+            return res.json(schedules)
+        }
+    };
+
+    static cancelTimeslot = async (req: Request, res: Response, next: NextFunction) => {
+        const token = req.header('Authorization');
+        const timeslotId = req.params.id;
+
+        const user = await UserService.getUserByToken(token);
+        if (!user) {
+            return res.status(404).send()
+        }
+
+        const schedules = await Schedule.update({'timeslots._id': timeslotId}, {
             '$set': {
-                'timeslots.$.userId': user._id,
-                'timeslots.$.status': newStatus
+                'timeslots.$.userId': null,
+                'timeslots.$.status': 'IDLE'
             }
-        })
-    } else {
-        schedules = await Schedule.update({'timeslots._id': timeslotId}, {
-            '$set': {
-                'timeslots.$.status': newStatus
-            }
-        })
-    }
+        });
 
-    return res.end(JSON.stringify(schedules));
-};
+        if (!schedules)
+            return res.status(400).send();
+        else {
+            return res.json(schedules)
+        }
+    };
 
-export let cancelTimeslot = async (req: Request, res: Response, next: NextFunction) => {
-    const token = req.header('Authorization');
-    const timeslotId = req.params.id
+    static deleteAllSchedule = async (req: Request, res: Response, next: NextFunction) => {
+        const schedules = await ScheduleService.deleteAllSchedules();
 
-    const user: IUserModel = await UserService.getUserByToken(token)
-    if (!user) {
-        Logger.logger.info(`[PATCH] user not found`);
-        return res.status(404).send()
-    }
-
-    const schedules = await Schedule.update({'timeslots._id': timeslotId}, {'$set': {
-        'timeslots.$.userId' : null,
-        'timeslots.$.status': 'IDLE' // TODO should use enum
-    }})
-
-    return res.end(JSON.stringify(schedules));
+        if (!schedules)
+            return res.status(400).send();
+        else {
+            return res.json(schedules)
+        }
+    };
 }
-
-export let deleteAllSchedule = async (req: Request, res: Response, next: NextFunction) => {
-    await Schedule.deleteMany({});
-    return res.end(JSON.stringify("HAHAHA. ALL SCHEDULES DELETED"));
-};

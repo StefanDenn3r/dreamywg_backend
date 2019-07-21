@@ -1,7 +1,7 @@
 import {Logger} from "../utils/logger";
 import {Flat} from "./flat";
-import {User} from "../users/user"
-import {FlatOfferer} from '../flatOfferer/flatOfferer'
+import {UserService} from "../users/userService";
+import {FlatOffererService} from "../flatOfferer/flatOffererService";
 
 export class FlatService {
     /**
@@ -34,16 +34,16 @@ export class FlatService {
         }
     }
 
-    static async getOffererFlat(token) {
-        try {
-            const userId = await User.findOne({jwt_token: token}).select("_id");
-            const flatOfferer = await FlatOfferer.findOne({user: userId});
+    static async getFlatByToken(token) {
+        const user = await UserService.getUserByToken(token);
+        if (!user)
+            return null;
 
-            return await Flat.findById(flatOfferer.flat);
-        } catch (e) {
-            Logger.logger.error(e);
-            return null
-        }
+        const flatOfferer = await FlatOffererService.getFlatoffererByUser(user);
+        if (!flatOfferer)
+            return null;
+
+        return flatOfferer.flat;
     }
 
     static async deleteFlatById(id) {
