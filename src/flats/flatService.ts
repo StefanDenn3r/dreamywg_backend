@@ -11,7 +11,7 @@ export class FlatService {
         try {
             return await Flat.find();
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     }
@@ -20,7 +20,7 @@ export class FlatService {
         try {
             return await Flat.deleteMany({});
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     }
@@ -29,7 +29,7 @@ export class FlatService {
         try {
             return await Flat.findById(id);
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     }
@@ -50,7 +50,7 @@ export class FlatService {
         try {
             return await Flat.findByIdAndDelete(id);
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     }
@@ -59,7 +59,7 @@ export class FlatService {
         try {
             await flat.save();
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     }

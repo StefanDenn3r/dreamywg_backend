@@ -14,7 +14,7 @@ export class FlatOffererService {
         try {
             return await FlatOfferer.find();
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     }
@@ -23,7 +23,7 @@ export class FlatOffererService {
         try {
             return await FlatOfferer.deleteMany({});
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     }
@@ -32,7 +32,7 @@ export class FlatOffererService {
         try {
             return await FlatOfferer.findById(id);
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     }
@@ -41,7 +41,7 @@ export class FlatOffererService {
         try {
             return await FlatOfferer.findOne({user: user}).populate('flat').exec();
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     }
@@ -61,7 +61,7 @@ export class FlatOffererService {
         try {
             return await Promise.all([user.save(), flat.save(), flatOfferer.save()]);
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     }
@@ -74,7 +74,7 @@ export class FlatOffererService {
         try {
             return await FlatOfferer.findOne({'flat': flat}).populate('user');
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     };

@@ -78,7 +78,7 @@ export class SearchService {
 
             return res.sort((a, b) => b.matched - a.matched)
         } catch (e) {
-            Logger.logger.error(e);
+            Logger.logger.error(e.message);
             return null
         }
     };
