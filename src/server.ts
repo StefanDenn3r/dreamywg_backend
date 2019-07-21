@@ -48,13 +48,12 @@ export default class Server {
         this.app.use(helmet());
         this.app.use(cors());
         this.app.use(compression());
-        this.app.use(errorHandler.logging);
-        this.app.use(errorHandler.clientErrorHandler);
         this.app.use(errorHandler.errorHandler);
     }
 
     private applyRoutes(): void {
         this.app.use((req, res, next) => {
+            Logger.logger.info(`[${req.method}] ${req.originalUrl}`);
             res.header("Access-Control-Allow-Origin", "*");
             res.header(
                 "Access-Control-Allow-Headers",
